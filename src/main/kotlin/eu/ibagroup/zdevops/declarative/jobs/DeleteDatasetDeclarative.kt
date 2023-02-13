@@ -1,11 +1,8 @@
 package eu.ibagroup.zdevops.declarative.jobs
 
 import eu.ibagroup.r2z.zowe.client.sdk.core.ZOSConnection
-import eu.ibagroup.r2z.zowe.client.sdk.zosfiles.ZosDsn
-import eu.ibagroup.r2z.zowe.client.sdk.zosfiles.ZosDsnList
-import eu.ibagroup.r2z.zowe.client.sdk.zosfiles.input.ListParams
 import eu.ibagroup.zdevops.declarative.AbstractZosmfAction
-import eu.ibagroup.zdevops.utils.runMFTryCatchWrappedQuery
+import eu.ibagroup.zdevops.logic.DeleteOperation
 import hudson.*
 import hudson.FilePath
 import hudson.model.Run
@@ -14,13 +11,52 @@ import org.jenkinsci.Symbol
 import org.kohsuke.stapler.DataBoundConstructor
 import org.kohsuke.stapler.DataBoundSetter
 
-
+/**
+ * This class contains delete mainframe dataset operation description
+ * which can be used in jenkins declarative script
+ *
+ * To delete a dataset, specify its name via dsn parameter:
+ * ```
+ * deleteDataset dsn:"USER1A.TEST.HELLO"
+ * ```
+ * And out will be:
+ * ```
+ * Deleting dataset USER1A.TEST.HELLO with connection 172.20.2.2:10443
+ * Successfully deleted
+ * ```
+ * You cannot delete a VSAM dataset this way. Otherwise, you will get output similar to:
+ * ```
+ * Deleting dataset USER1A.TEST.KSDS with connection 172.20.2.2:10443
+ * ISRZ002 Deallocation failed - Deallocation failed for data set 'USER1A.TEST.KSDS'
+ * ```
+ * To delete a member from the library, the dsn and member parameters must be specified:
+ * ```
+ * deleteDataset dsn:"USER1A.TEST.LIB", member:"MEMBER1"
+ * ```
+ * And out will be:
+ * ```
+ * Deleting member MEMBER1 from dataset "USER1A.JCL.LIB" with connection 172.20.2.2:10443
+ * Successfully deleted
+ * ```
+ * What do you get if a dataset does not exist?
+ * ```
+ * Deleting dataset USER1A.DS.DOES.NOT.EXIST with connection 172.20.2.2:10443
+ * ISRZ002 Data set not cataloged - 'USER1A.DS.DOES.NOT.EXIST' was not found in catalog.
+ * ```
+ * What do you get if a dataset is busy by a user or a program?
+ * ```
+ * Deleting dataset USER1A.DS.ISUSED.BY.USER with connection 172.20.2.2:10443
+ * ISRZ002 Data set in use - Data set 'USER1A.DS.ISUSED.BY.USER' in use by another user, try later or enter HELP for a list of jobs and users allocated to 'USER1A.DS.ISUSED.BY.USER'.
+ * ```
+ * It can take 2 params:
+ * @param dsn dataset name - sequential or library
+ * @param member dataset member name
+ */
 class DeleteDatasetDeclarative @DataBoundConstructor constructor(
 ) : AbstractZosmfAction() {
 
     private var dsn: String = ""
     private var member: String = ""
-    private var mask: String = ""
 
     @DataBoundSetter
     fun setDsn(dsn: String) { this.dsn = dsn }
@@ -28,11 +64,7 @@ class DeleteDatasetDeclarative @DataBoundConstructor constructor(
     @DataBoundSetter
     fun setMember(member: String) { this.member = member }
 
-    @DataBoundSetter
-    fun setMask(mask: String) { this.mask = mask }
-
-    override val exceptionMessage: String = zMessages.zdevops_declarative_deleting_ds_fail()
-    private val successMessage: String = zMessages.zdevops_declarative_deleting_ds_success()
+    override val exceptionMessage: String = zMessages.zdevops_deleting_ds_fail()
 
     override fun perform(
         run: Run<*, *>,
@@ -42,46 +74,10 @@ class DeleteDatasetDeclarative @DataBoundConstructor constructor(
         listener: TaskListener,
         zosConnection: ZOSConnection
     ) {
-
-        if (dsn.isNotEmpty() && mask.isNotEmpty()) {
-            throw AbortException(zMessages.zdevops_declarative_deleting_ds_fail_both_params())
-        }
-        if (dsn.isEmpty() && mask.isEmpty()) {
-            throw AbortException(zMessages.zdevops_declarative_deleting_ds_fail_none_params())
-        }
-        if (dsn.isNotEmpty()) {
-            val memberNotEmpty = member.isNotEmpty()
-            val logMessage = if (memberNotEmpty) zMessages.zdevops_declarative_deleting_ds_member(member, dsn, zosConnection.host, zosConnection.zosmfPort)
-                             else zMessages.zdevops_declarative_deleting_ds(dsn, zosConnection.host, zosConnection.zosmfPort)
-            listener.logger.println(logMessage)
-            runMFTryCatchWrappedQuery(listener) {
-                val response = if (memberNotEmpty) ZosDsn(zosConnection).deleteDsn(dsn, member)
-                               else ZosDsn(zosConnection).deleteDsn(dsn)
-            }
-            listener.logger.println(successMessage)
-            return
-        }
-        if (mask.isNotEmpty()) {
-            listener.logger.println(zMessages.zdevops_declarative_deleting_ds_by_mask(mask))
-            val dsnList = ZosDsnList(zosConnection).listDsn(mask, ListParams())
-            if (dsnList.items.isEmpty()) {
-                throw AbortException(zMessages.zdevops_declarative_deleting_ds_fail_no_matching_mask())
-            }
-            dsnList.items.forEach {
-                runMFTryCatchWrappedQuery(listener) {
-                    listener.logger.println(zMessages.zdevops_declarative_deleting_ds(it.name, zosConnection.host, zosConnection.zosmfPort))
-                    ZosDsn(zosConnection).deleteDsn(it.name)
-                }
-            }
-            listener.logger.println(successMessage)
-            return
-        }
+        DeleteOperation.deleteDatasetOrMember(dsn, member, zosConnection, listener)
     }
 
-
-    @Symbol("deleteDS")
+    @Symbol("deleteDataset")
     @Extension
     class DescriptorImpl : Companion.DefaultBuildDescriptor("Delete Dataset or Dataset member Declarative")
-
 }
-
