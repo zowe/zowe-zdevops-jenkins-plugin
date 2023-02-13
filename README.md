@@ -61,6 +61,10 @@ stage ("stage-name") {
             writeToFile destFile: "u/USER/doc", text: "Hello there"
             writeFileToFile destFile: "u/USER/doc", sourceFile: "myfile.txt"
             writeFileToFile destFile: "u/USER/doc", sourceFile: "myfile.txt", binary: "true"
+            
+            deleteDataset dsn:"USER.DATASET"
+            deleteDataset dsn:"USER.DATASET", member:"MEMBER1"
+            deleteDatasetsByMask mask:"USER.DATASET.*"
         }
         // ...
     }
