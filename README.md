@@ -57,6 +57,10 @@ stage ("stage-name") {
             writeFileToMember dsn:"USER.DATASET", member:"MEMBER", file:"workspaceFile"
             writeFileToMember dsn:"USER.DATASET", member:"MEMBER", file:"D:\\files\\localFile"
             writeToMember dsn:"USER.DATASET", member:"MEMBER", text:"Write this string to member"
+
+            writeToFile destFile: "u/USER/doc", text: "Hello there"
+            writeFileToFile destFile: "u/USER/doc", sourceFile: "myfile.txt"
+            writeFileToFile destFile: "u/USER/doc", sourceFile: "myfile.txt", binary: "true"
         }
         // ...
     }

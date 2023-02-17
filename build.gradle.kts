@@ -38,7 +38,7 @@ dependencies {
     implementation("com.squareup.retrofit2:retrofit:2.9.0")
     implementation("com.squareup.retrofit2:converter-gson:2.9.0")
     implementation("com.squareup.retrofit2:converter-scalars:2.9.0")
-    implementation("org.zowe.sdk:zowe-kotlin-sdk:0.3.1")
+    implementation("org.zowe.sdk:zowe-kotlin-sdk:0.4.0-rc.2")
 
     // Jenkins development related plugins
     implementation("org.jenkins-ci.plugins.workflow:workflow-step-api:2.23")
