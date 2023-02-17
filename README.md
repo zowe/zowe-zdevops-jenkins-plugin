@@ -71,6 +71,19 @@ stage ("stage-name") {
 }
 ```
 
+## Commit Messages for Jira issues fixes
+Git commit messages should start with a reference to the Jira issue they’re related to, if applicable, followed by a short summary on the first line, and more details on subsequent lines. Example:
+
+``` [JENKINS-00000] Frobnicate the widget ```
+
+If a given commit fixes the specified issue, use of one of the following prefixes will make an automated infra process resolve the related Jira issue.
+
+```
+[FIX JENKINS-00000] Frobnicate the widget
+[FIXED JENKINS-00000] Frobnicate the widget
+[FIXES JENKINS-00000] Frobnicate the widget
+```
+
 ## How to run:
 - `./gradlew server --debug-jvm`
 - wait until `hudson.lifecycle.Lifecycle#onReady: Jenkins is fully up and running`
