@@ -7,6 +7,7 @@
  *
  * Copyright IBA Group 2022
  */
+
 package org.zowe.zdevops.declarative.jobs
 
 import org.zowe.kotlinsdk.zowe.client.sdk.core.ZOSConnection

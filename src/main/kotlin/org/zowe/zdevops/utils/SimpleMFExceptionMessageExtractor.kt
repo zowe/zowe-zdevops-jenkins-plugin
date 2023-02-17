@@ -7,6 +7,7 @@
  *
  * Copyright IBA Group 2022
  */
+
 package org.zowe.zdevops.utils
 
 import com.google.gson.Gson
