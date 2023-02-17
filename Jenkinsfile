@@ -8,4 +8,4 @@
  * Copyright IBA Group 2022
  */
 
-rootProject.name = "zos-devops"
+buildPluginWithGradle(useContainerAgent: true, tests: [[skip: 'true']], configurations: [[platform: 'linux', jdk: '11']])

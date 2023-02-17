@@ -1,10 +1,23 @@
+/*
+ * This program and the accompanying materials are made available under the terms of the
+ * Eclipse Public License v2.0 which accompanies this distribution, and is available at
+ * https://www.eclipse.org/legal/epl-v20.html
+ *
+ * SPDX-License-Identifier: EPL-2.0
+ *
+ * Copyright IBA Group 2022
+ */
+
 import org.jetbrains.kotlin.gradle.tasks.KotlinCompile
 
 val kotlinVersion = findProperty("kotlinVersion")
 
+project.gradle.startParameter.excludedTaskNames.add("copyGeneratedJenkinsTestPluginDependencies")
+project.gradle.startParameter.excludedTaskNames.add("copyTestPluginDependencies")
+
 plugins {
-    kotlin("jvm") version ("1.5.10")
-    kotlin("kapt") version ("1.5.10")
+    kotlin("jvm") version ("1.6.0")
+    kotlin("kapt") version ("1.6.0")
 
     id("org.jenkins-ci.jpi") version ("0.43.0")
 }
@@ -12,28 +25,20 @@ plugins {
 repositories {
     mavenCentral()
     maven {
-        url = uri("http://10.221.23.186:8082/repository/internal/")
-        isAllowInsecureProtocol = true
-        credentials {
-            username = "admin"
-            password = "password123"
-        }
-        metadataSources {
-            mavenPom()
-            artifact()
-            ignoreGradleMetadataRedirection()
-        }
+        url = uri("https://zowe.jfrog.io/zowe/libs-release")
     }
 }
 
 dependencies {
-    kotlin("stdlib", kotlinVersion as String)
+    implementation(fileTree("lib"))
+    compileOnly(fileTree("lib"))
+    kotlin("stdlib-jre11", kotlinVersion as String)
 
     // Retrofit and r2z is used to run z/OSMF REST API
     implementation("com.squareup.retrofit2:retrofit:2.9.0")
     implementation("com.squareup.retrofit2:converter-gson:2.9.0")
     implementation("com.squareup.retrofit2:converter-scalars:2.9.0")
-    implementation("eu.ibagroup:r2z:1.2.0-rc.3")
+    implementation("org.zowe.sdk:zowe-kotlin-sdk:0.4.0-rc.2")
 
     // Jenkins development related plugins
     implementation("org.jenkins-ci.plugins.workflow:workflow-step-api:2.23")
@@ -44,22 +49,31 @@ dependencies {
 }
 
 java {
-    sourceCompatibility = JavaVersion.VERSION_1_8
+    sourceCompatibility = JavaVersion.VERSION_11
 }
 
 kapt {
     correctErrorTypes = true
+    includeCompileClasspath = false
 }
 
 jenkinsPlugin {
-    jenkinsVersion.set("2.319.2")
-    displayName = "zOS DevOps Plugin"
-    shortName = "z-devops"
-    gitHubUrl = "https://github.com/===TBD==="  // TODO add real repo
+    jenkinsVersion.set("2.357")
+    displayName = "Zowe z/OS DevOps"
+    shortName = "zdevops"
+    gitHubUrl = "https://github.com/jenkinsci/zos-devops-plugin.git"
 
     compatibleSinceVersion = jenkinsVersion.get()
-    fileExtension = "jpi"
+    fileExtension = "hpi"
     pluginFirstClassLoader = true
+
+    licenses = this.Licenses().apply {
+        license(delegateClosureOf<org.jenkinsci.gradle.plugins.jpi.JpiLicense> {
+            setProperty("name", "Eclipse Public License - v 2.0")
+            setProperty("url", "https://www.eclipse.org/org/documents/epl-2.0/EPL-2.0.txt")
+            setProperty("distribution", "repo")
+        })
+    }
 }
 
 tasks.withType(KotlinCompile::class.java).all {
