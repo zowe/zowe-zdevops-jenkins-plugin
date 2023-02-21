@@ -25,7 +25,7 @@ plugins {
 repositories {
     mavenCentral()
     maven {
-        url = uri("https://zowe.jfrog.io/zowe/libs-release")
+        url = uri("https://zowe.jfrog.io/artifactory/libs-release")
     }
 }
 
@@ -54,7 +54,12 @@ java {
 
 kapt {
     correctErrorTypes = true
-    includeCompileClasspath = false
+}
+
+tasks.withType<KotlinCompile> {
+    kotlinOptions {
+        jvmTarget = JavaVersion.VERSION_11.toString()
+    }
 }
 
 jenkinsPlugin {

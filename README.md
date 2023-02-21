@@ -85,7 +85,7 @@ If a given commit fixes the specified issue, use of one of the following prefixe
 ```
 
 ## How to run:
-- `./gradlew server --debug-jvm`
+- `./gradlew server`
 - wait until `hudson.lifecycle.Lifecycle#onReady: Jenkins is fully up and running`
 - open `localhost:8080`
 - enjoy
