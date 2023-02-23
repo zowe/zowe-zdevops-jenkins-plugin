@@ -25,7 +25,7 @@ plugins {
 repositories {
     mavenCentral()
     maven {
-        url = uri("https://zowe.jfrog.io/zowe/libs-release")
+        url = uri("https://zowe.jfrog.io/artifactory/libs-release")
     }
 }
 
@@ -34,7 +34,7 @@ dependencies {
     compileOnly(fileTree("lib"))
     kotlin("stdlib-jre11", kotlinVersion as String)
 
-    // Retrofit and r2z is used to run z/OSMF REST API
+    // Retrofit and Kotlin SDK is used to run z/OSMF REST API
     implementation("com.squareup.retrofit2:retrofit:2.9.0")
     implementation("com.squareup.retrofit2:converter-gson:2.9.0")
     implementation("com.squareup.retrofit2:converter-scalars:2.9.0")
@@ -54,7 +54,12 @@ java {
 
 kapt {
     correctErrorTypes = true
-    includeCompileClasspath = false
+}
+
+tasks.withType<KotlinCompile> {
+    kotlinOptions {
+        jvmTarget = JavaVersion.VERSION_11.toString()
+    }
 }
 
 jenkinsPlugin {
