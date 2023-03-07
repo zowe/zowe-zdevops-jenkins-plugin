@@ -53,8 +53,6 @@
         <tag>${scmTag}</tag>
     </scm>
 
-
-
     <build>
         <plugins>
             <plugin>
@@ -248,7 +246,7 @@
         <dependency>
             <groupId>org.zowe.sdk</groupId>
             <artifactId>zowe-kotlin-sdk</artifactId>
-            <version>0.3.1</version>
+            <version>0.4.0-rc.2</version>
         </dependency>
 
         <dependency>
