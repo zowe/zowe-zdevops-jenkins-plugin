@@ -46,7 +46,6 @@ class DeleteOperation {
         }
 
         fun deleteDatasetOrMember(dsn: String, member: String, zosConnection: ZOSConnection, listener: TaskListener) {
-            isMemberNameValid(member)
             if (dsn.isEmpty()) {
                 throw AbortException(zMessages.zdevops_deleting_ds_fail_dsn_param_empty())
             }
@@ -55,8 +54,11 @@ class DeleteOperation {
                              else zMessages.zdevops_deleting_ds(dsn, zosConnection.host, zosConnection.zosmfPort)
             listener.logger.println(logMessage)
             runMFTryCatchWrappedQuery(listener) {
-                val response = if (memberNotEmpty) ZosDsn(zosConnection).deleteDsn(dsn, member)
-                               else ZosDsn(zosConnection).deleteDsn(dsn)
+                val response = if (memberNotEmpty) {
+                    isMemberNameValid(member)
+                    ZosDsn(zosConnection).deleteDsn(dsn, member)
+                }
+                else ZosDsn(zosConnection).deleteDsn(dsn)
             }
             listener.logger.println(successMessage)
         }
