@@ -32,6 +32,9 @@ import net.sf.json.JSONObject
 import org.kohsuke.stapler.DataBoundConstructor
 import org.kohsuke.stapler.QueryParameter
 import org.kohsuke.stapler.StaplerRequest
+import java.io.IOException
+import java.io.ObjectInputStream
+import java.io.ObjectOutputStream
 import java.net.URL
 import java.util.*
 
@@ -122,5 +125,15 @@ constructor(
       }
       return FormValidation.ok(zMessages.zdevops_config_ZOSConnection_validation_success())
     }
+  }
+
+  @Throws(IOException::class)
+  private fun writeObject(stream: ObjectOutputStream) {
+    stream.defaultWriteObject()
+  }
+
+  @Throws(IOException::class, ClassNotFoundException::class)
+  private fun readObject(stream: ObjectInputStream) {
+    stream.defaultReadObject()
   }
 }
