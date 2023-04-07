@@ -1,18 +1,34 @@
-# Zowe z/OS DevOps Jenkins plugin
+# Zowe zDevOps Jenkins plugin
 
-## Main features
-- Secure and modern connection of Jenkins to the mainframes through the use of z/OSMF REST API
-- The functionality is based on the Zowe Kotlin SDK methods, such as JCL jobs submission, download, allocate, remove, write to the dataset, etc., with a log collected upon finish
-- Multiple connections to various mainframes - z/OS Connections List where you can save all the necessary systems and credentials, all data are safely stored under the protection of Jenkins Credentials manager
-- Agent-less solution
-- z/OSMF connection validation
-- Fast execution and functional extensibility
+## About  the plugin
+The Zowe zDevOps Jenkins Plugin by [IBA Group](https://ibagroupit.com/?utm_campaign=IBA_W-Mainframe&utm_source=jenkins&utm_medium=referral&utm_content=description_zdevops) is an open-source, secure , and reliable agent-less Jenkins plugin that makes it possible to perform most of the actual tasks on the mainframe, managing it with a modern native mainframe zOSMF REST API and the capabilities of available zOSMF SDKs.
+
+## Advantages
+- Secure and modern connection of Jenkins to the mainframes through the use of zOSMF REST API.
+- The functionality is based on the Kotlin SDK methods, such as JCL jobs submission, download, allocate, write to the dataset, etc., with a log collected upon completion.
+- Multiple connections to various mainframes—z/OS Connections List where you can save all the necessary systems and credentials; all data is safely stored under the protection of Jenkins Credentials manager.
+- Agent-less.
+- z/OSMF connection validation.
+- Fast execution and functional extensibility.
+
+## About us
+With over 30 years of experience in the mainframe domain, IBA Group is committed to maximizing your mainframe investment and enhancing your IT flexibility.
+
+One of the services we offer is Mainframe DevOps. Our approach is highly flexible, as we work with customers to choose the essential toolset for establishing a pipeline based on their preferences, existing tools, and the latest open-source opportunities (such as Zowe and plugins).
+
+We are also familiar with [Mainframe DevOps Solutions](https://mainframe.ibagroupit.com/?utm_campaign=IBA_W-Mainframe&utm_source=jenkins&utm_medium=referral&utm_content=description_zdevops) of 2023 that can help modernize your mainframe and keep you competitive.
+
+We value your feedback and welcome any suggestions, proposals, or even complaints.
+
+Please feel free to contact us or schedule a call with our Mainframe DevOps expert.
+
+Thank you for considering IBA Group for your mainframe needs.
 
 ## Manual plugin installation by the .hpi executable file
 The plugin are packaged as self-contained <b>.hpi</b> files, which have all the necessary code, images, and other resources which the plugin needs to operate successfully.
 
 ### <b>Already packaged and tested installation .hpi file can be downloaded from a link from a nearby GitHub repository:</b>
-### <b>[Zowe z/OS DevOps plugin installation .hpi file](https://github.com/IBA-mainframe-dev/Global-Repository-for-Mainframe-Developers/blob/master/Jenkins%20zOS%20DevOps%20plugin%20installable%20hpi/zos-devops.hpi)</b>
+### <b>[Zowe zDevOps plugin installation .hpi file](https://github.com/IBA-mainframe-dev/Global-Repository-for-Mainframe-Developers/blob/master/Jenkins%20zOS%20DevOps%20plugin%20installable%20hpi/zos-devops.hpi)</b>
 
 Assuming a <b>.hpi</b> file has been downloaded, a logged-in Jenkins administrator may upload the file from within the web UI:
 1. Navigate to the <b>Manage Jenkins > Manage Plugins</b> page in the web UI.
@@ -21,7 +37,7 @@ Assuming a <b>.hpi</b> file has been downloaded, a logged-in Jenkins administrat
 4. <b>Deploy</b> the plugin file.
 
 ## Manual Jenkins plugin installation (Installation via source code build and .hpi file upload)
-1. Download the Zowe Jenkins z/OS DevOps plugin source code from its [official GitHub repository](https://github.com/jenkinsci/zdevops-plugin)
+1. Download the Zowe zDevOps Jenkins plugin source code from its [official GitHub repository](https://github.com/jenkinsci/zdevops-plugin)
 2. It is necessary to build the project with the help of the Maven Build Tool
 3. To generate the ```target``` dir with generated-sources - you have to run the Maven command: ```mvn localizer:generate```
 4. Next, you need to generate an installation file: .hpi or .jpi file (both are installation files for the Jenkins plugin). This can be done by executing Maven command ```mvn install``` or by ```mvn hpi:hpi```.

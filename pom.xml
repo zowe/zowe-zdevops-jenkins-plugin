@@ -4,23 +4,23 @@
     <parent>
         <groupId>org.jenkins-ci.plugins</groupId>
         <artifactId>plugin</artifactId>
-        <version>4.51</version>
+        <version>4.55</version>
         <relativePath />
     </parent>
 
-    <groupId>io.jenkins.plugins</groupId>
     <artifactId>zdevops</artifactId>
-    <version>0.1.0-SNAPSHOT</version>
-    <name>z/OS DevOps</name>
+    <version>${revision}${changelist}</version>
+    <name>Zowe zDevOps</name>
+    <groupId>io.jenkins.plugins</groupId>
+    <packaging>hpi</packaging>
 
     <url>https://github.com/jenkinsci/${project.artifactId}-plugin</url>
-    <packaging>hpi</packaging>
+
 
     <properties>
         <revision>0.1.0</revision>
-        <changelist>999999-SNAPSHOT</changelist>
+        <changelist>-SNAPSHOT</changelist>
         <jenkins.version>2.361</jenkins.version>
-        <java.level>11</java.level>
         <java.version>11</java.version>
         <kotlin.version>1.7.0</kotlin.version>
         <kotlin.compiler.incremental>true</kotlin.compiler.incremental>
@@ -29,6 +29,9 @@
         <kotlin.compiler.jvmTarget>11</kotlin.compiler.jvmTarget>
         <tests.skip>true</tests.skip>
         <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
+        <!-- TODO fix all warnings -->
+        <spotbugs.threshold>High</spotbugs.threshold>
+        <gitHubRepo>jenkinsci/${project.artifactId}-plugin</gitHubRepo>
     </properties>
 
     <licenses>
@@ -47,9 +50,9 @@
     </developers>
 
     <scm>
-        <connection>scm:git:git://github.com/jenkinsci/${project.artifactId}-plugin.git</connection>
-        <developerConnection>scm:git:git@github.com:jenkinsci/${project.artifactId}-plugin.git</developerConnection>
-        <url>https://github.com/jenkinsci/${project.artifactId}-plugin</url>
+        <connection>scm:git:https://github.com/${gitHubRepo}.git</connection>
+        <developerConnection>scm:git:git@github.com:${gitHubRepo}.git</developerConnection>
+        <url>https://github.com/${gitHubRepo}</url>
         <tag>${scmTag}</tag>
     </scm>
 
@@ -301,7 +304,7 @@
         <dependency>
             <groupId>junit</groupId>
             <artifactId>junit</artifactId>
-            <version>4.13</version>
+            <version>4.13.2</version>
             <scope>test</scope>
         </dependency>
 
