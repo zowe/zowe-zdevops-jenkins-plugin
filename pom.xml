@@ -8,7 +8,7 @@
         <relativePath />
     </parent>
 
-    <groupId>io.jenkins.plugins</groupId>
+    <groupId>org.zowe</groupId>
     <artifactId>zdevops</artifactId>
     <version>0.1.0-SNAPSHOT</version>
     <name>z/OS DevOps</name>
