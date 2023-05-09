@@ -4,6 +4,7 @@ work
 target
 .idea/
 .vscode
+.gradle/
 build/
 
 .mvn/wrapper/
