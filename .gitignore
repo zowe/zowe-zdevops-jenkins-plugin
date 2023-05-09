@@ -5,3 +5,7 @@ target
 .idea/
 .vscode
 build/
+
+.mvn/wrapper/
+
+src/test/resources/trash/
