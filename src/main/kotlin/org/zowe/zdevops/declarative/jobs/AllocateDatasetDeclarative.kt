@@ -108,7 +108,7 @@ class AllocateDatasetDeclarative @DataBoundConstructor constructor(private val d
             dsnType,
             dsModel
         )
-        val allocatedDS = ZosDsn(zosConnection).createDsn(dsn, alcParms)
+        ZosDsn(zosConnection).createDsn(dsn, alcParms)
         listener.logger.println(zMessages.zdevops_declarative_DSN_allocated_success(dsn))
     }
 

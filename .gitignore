@@ -4,5 +4,9 @@ work
 target
 .idea/
 .vscode
-build/
 .gradle/
+build/
+
+.mvn/wrapper/
+
+src/test/resources/trash/

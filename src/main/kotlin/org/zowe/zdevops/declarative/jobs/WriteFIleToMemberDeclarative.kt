@@ -47,22 +47,17 @@ class WriteFIleToMemberDeclarative @DataBoundConstructor constructor(private val
         }
 
         val targetDS = ZosDsn(zosConnection).getDatasetInfo(dsn)
-        if (targetDS.recordLength == null) {
-            throw AbortException(zMessages.zdevops_declarative_writing_DS_no_info(dsn))
-        }
-        var ineligibleStrings = 0
-        textFile.readLines().forEach {
-            if (it.length > targetDS.recordLength!!) {
-                ineligibleStrings++
-            }
-        }
+        val targetDSLRECL = targetDS.recordLength ?: throw AbortException(zMessages.zdevops_declarative_writing_DS_no_info(dsn))
+        val ineligibleStrings = textFile
+            .readLines()
+            .map { it.length }
+            .fold(0) { result, currStrLength -> if (currStrLength > targetDSLRECL) result + 1 else result }
         if (ineligibleStrings > 0) {
-            throw AbortException(zMessages.zdevops_declarative_writing_DS_ineligible_strings(ineligibleStrings,dsn))
-        } else {
-            val textString = textFile.readText().replace("\r","")
-            val writeToDS = ZosDsn(zosConnection).writeDsn(dsn, member, textString.toByteArray())
-            listener.logger.println(zMessages.zdevops_declarative_writing_DS_success(dsn))
+            throw AbortException(zMessages.zdevops_declarative_writing_DS_ineligible_strings(ineligibleStrings, dsn))
         }
+        val textString = textFile.readText().replace("\r","")
+        ZosDsn(zosConnection).writeDsn(dsn, member, textString.toByteArray())
+        listener.logger.println(zMessages.zdevops_declarative_writing_DS_success(dsn))
     }
 
 

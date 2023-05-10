@@ -48,21 +48,17 @@ class SubmitJobSyncStepDeclarative @DataBoundConstructor constructor(private val
       listener.logger.println(zMessages.zdevops_declarative_ZOSJobs_getting_log())
       val spoolFiles = GetJobs(zosConnection).getSpoolFilesForJob(finalResult)
       if (spoolFiles.isNotEmpty()) {
-        var fullLog = spoolFiles.joinToString { GetJobs(zosConnection).getSpoolContent(it) } //spoolFiles.forEach { fullLog = fullLog.plus(GetJobs(zosConnection).getSpoolContent(it)) }
-        if (fullLog != null) {
-          val workspacePath = workspace.remote.replace(workspace.name, "")
-          val logPath = "$workspacePath${finalResult.jobName}.${finalResult.jobId}"
-          val file = File(logPath)
-          file.writeText(fullLog!!)
-          listener.logger.println(zMessages.zdevops_declarative_ZOSJobs_got_log(
-                  HyperlinkNote.encodeTo(
-                      "${env["BUILD_URL"]}execution/node/3/ws/${finalResult.jobName}.${finalResult.jobId}/*view*/",
-                      "${finalResult.jobName}.${finalResult.jobId}"
-                  )
-          ))
-        } else {
-          listener.logger.println(zMessages.zdevops_spool_content_error(submitJobRsp.jobid))
-        }
+        val fullLog = spoolFiles.joinToString { GetJobs(zosConnection).getSpoolContent(it) }
+        val workspacePath = workspace.remote.replace(workspace.name, "")
+        val logPath = "$workspacePath${finalResult.jobName}.${finalResult.jobId}"
+        val file = File(logPath)
+        file.writeText(fullLog)
+        listener.logger.println(zMessages.zdevops_declarative_ZOSJobs_got_log(
+                HyperlinkNote.encodeTo(
+                    "${env["BUILD_URL"]}execution/node/3/ws/${finalResult.jobName}.${finalResult.jobId}/*view*/",
+                    "${finalResult.jobName}.${finalResult.jobId}"
+                )
+        ))
       } else {
         listener.logger.println(zMessages.zdevops_no_spool_files(submitJobRsp.jobid))
       }

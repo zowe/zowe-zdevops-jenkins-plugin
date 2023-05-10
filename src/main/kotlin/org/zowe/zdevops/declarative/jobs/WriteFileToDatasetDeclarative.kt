@@ -59,7 +59,7 @@ class WriteFileToDatasetDeclarative @DataBoundConstructor constructor(private va
             throw AbortException(zMessages.zdevops_declarative_writing_DS_ineligible_strings(ineligibleStrings,dsn))
         } else {
             val textString = textFile.readText().replace("\r","")
-            val writeToDS = ZosDsn(zosConnection).writeDsn(dsn, textString.toByteArray())
+            ZosDsn(zosConnection).writeDsn(dsn, textString.toByteArray())
             listener.logger.println(zMessages.zdevops_declarative_writing_DS_success(dsn))
         }
     }

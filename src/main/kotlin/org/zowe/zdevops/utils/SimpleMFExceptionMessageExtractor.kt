@@ -15,11 +15,21 @@ import com.google.gson.reflect.TypeToken
 import hudson.model.TaskListener
 import java.lang.NullPointerException
 
+// TODO: doc
 inline fun <R> runMFTryCatchWrappedQuery(listener: TaskListener, call: () -> R): Result<R> {
     try {
         return Result.success(call())
     } catch (e: Exception) {
-        val responseMap: Map<String, Any> = Gson().fromJson(e.message, object : TypeToken<Map<String, Any>>() {}.type)
+        lateinit var responseMap: Map<String, Any>
+        try {
+            responseMap = Gson().fromJson(e.message, object : TypeToken<Map<String, Any>>() {}.type)
+        } catch (eInternal: Exception) {
+            if (eInternal.message?.contains(Regex("Expected .* but was STRING")) == true) {
+                listener.logger.println(e.message)
+            } else {
+                listener.logger.println(eInternal.message)
+            }
+        }
         var errorContent: Any
         try {
             errorContent = responseMap.get("details") as ArrayList<*>

@@ -54,7 +54,7 @@ class DeleteOperation {
                              else zMessages.zdevops_deleting_ds(dsn, zosConnection.host, zosConnection.zosmfPort)
             listener.logger.println(logMessage)
             runMFTryCatchWrappedQuery(listener) {
-                val response = if (memberNotEmpty) {
+                if (memberNotEmpty) {
                     isMemberNameValid(member)
                     ZosDsn(zosConnection).deleteDsn(dsn, member)
                 }
