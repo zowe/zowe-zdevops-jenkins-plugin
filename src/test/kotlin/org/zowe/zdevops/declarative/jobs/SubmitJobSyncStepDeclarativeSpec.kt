@@ -45,16 +45,17 @@ class SubmitJobSyncStepDeclarativeSpec : ShouldSpec({
   context("declarative/jobs module: SubmitJobStep") {
     val virtualChannel = TestVirtualChannel()
     val zosConnection = ZOSConnection(mockServer.hostName, mockServer.port.toString(), "test", "test", "https")
+    val rootDir = Paths.get("").toAbsolutePath().toString()
+    val trashDir = Paths.get(rootDir, "src", "test", "resources", "trash").toString()
     val itemGroup = object : TestItemGroup() {
       override fun getRootDirFor(child: Item?): File {
-        return File("")
+        return File(trashDir)
       }
     }
     val job = TestJob(itemGroup, "test")
     val run = TestRun(job)
-    val rootDir = Paths.get("").toAbsolutePath().toString()
-    val trashDir = Paths.get(rootDir, "src", "test", "resources", "trash", "test_name").toString()
-    val workspace = FilePath(File(trashDir))
+    val trashDirWithInternal = Paths.get(trashDir, "test_name").toString()
+    val workspace = FilePath(File(trashDirWithInternal))
     val env = EnvVars()
 
     afterEach {

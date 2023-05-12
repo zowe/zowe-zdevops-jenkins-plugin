@@ -47,14 +47,15 @@ class AllocateDatasetDeclarativeSpec : ShouldSpec({
   context("declarative/jobs module: AllocateDatasetDeclarative") {
     val virtualChannel = TestVirtualChannel()
     val zosConnection = ZOSConnection(mockServer.hostName, mockServer.port.toString(), "test", "test", "https")
+    val rootDir = Paths.get("").toAbsolutePath().toString()
+    val trashDir = Paths.get(rootDir, "src", "test", "resources", "trash").toString()
     val itemGroup = object : TestItemGroup() {
       override fun getRootDirFor(child: Item?): File {
-        return File("")
+        return File(trashDir)
       }
     }
     val job = TestJob(itemGroup, "test")
     val run = TestRun(job)
-    val rootDir = Paths.get("").toAbsolutePath().toString()
     val mockDir = Paths.get(rootDir, "src", "test", "resources", "mock", "here").toString()
     val workspace = FilePath(File(mockDir))
     val env = EnvVars()

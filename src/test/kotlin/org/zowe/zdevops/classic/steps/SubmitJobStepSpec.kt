@@ -26,6 +26,7 @@ import org.zowe.zdevops.MockResponseDispatcher
 import org.zowe.zdevops.MockServerFactory
 import java.io.File
 import java.io.PrintStream
+import java.nio.file.Paths
 
 class SubmitJobStepSpec : ShouldSpec({
   lateinit var mockServer: MockWebServer
@@ -40,9 +41,11 @@ class SubmitJobStepSpec : ShouldSpec({
     mockServerFactory.stopMockServer()
   }
   context("classic/steps module: SubmitJobStep") {
+    val rootDir = Paths.get("").toAbsolutePath().toString()
+    val trashDir = Paths.get(rootDir, "src", "test", "resources", "trash").toString()
     val itemGroup = object : TestItemGroup() {
       override fun getRootDirFor(child: Item?): File {
-        return File("")
+        return File(trashDir)
       }
     }
     val project = TestProject(itemGroup, "test")
