@@ -1,0 +1,89 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<?jelly escape-by-default='true'?>
+
+<jelly:jelly xmlns:jelly="jelly:core" xmlns:form="/lib/form">
+    <form:entry field="connectionName" title="${%zdevops.classic.connection.title}">
+        <form:select/>
+    </form:entry>
+    <form:entry field="dsn" title="Data Set Name">
+        <form:textbox/>
+    </form:entry>
+    <table style="width: 100%">
+<!--    help="/plugin/zdevops/help-mgntClass.html"-->
+        <tr>
+            <td>
+                <form:entry field="mgntClass" title="Management class" description="Blank for default management class">
+                    <form:textbox/>
+                </form:entry>
+            </td>
+            <td>
+                <form:entry field="storClass" title="Storage class" description="Blank for default storage class">
+                    <form:textbox/>
+                </form:entry>
+            </td>
+            <td>
+                <form:entry field="dataClass" title="Data class" description="Blank for default data class">
+                    <form:textbox/>
+                </form:entry>
+            </td>
+        </tr>
+    </table>
+    <form:entry field="volser" title="  Volume serial" description="Blank for system default volume">
+        <form:textbox/>
+    </form:entry>
+    <table style="width:100%">
+        <tr>
+            <td>
+                <form:entry field="dsOrg" title="Data Set Organization (DSORG)" description="Blank for default data class">
+                    <form:select/>
+                </form:entry>
+            </td>
+            <td>
+                <form:entry field="dsnType" title="Data set name type" description="&#8203;">
+                    <form:select/>
+                </form:entry>
+            </td>
+        </tr>
+    </table>
+    <form:entry field="alcUnit" title="Space units">
+        <form:select/>
+    </form:entry>
+    <table style="width: 100%">
+        <tr>
+            <td>
+                <form:entry field="primary" title="Primary quantity" description="In above units">
+                    <form:textbox default="1"/>
+                </form:entry>
+            </td>
+            <td>
+                <form:entry field="secondary" title="Secondary quantity" description="In above units">
+                    <form:textbox/>
+                </form:entry>
+            </td>
+            <td>
+<!--                help="/plugin/zdevops/help-dirBlk.html"-->
+                <form:entry field="dirBlk" title="Directory blocks" description="0 for sequential data set">
+                    <form:textbox/>
+                </form:entry>
+            </td>
+        </tr>
+    </table>
+    <form:entry field="recFm" title="Record format">
+        <form:select/>
+    </form:entry>
+    <table style="width: 100%">
+        <tr>
+            <td>
+                <form:entry field="lrecl" title="Record length">
+                    <form:textbox default="80"/>
+                </form:entry>
+            </td>
+            <td>
+                <form:entry field="blkSize" title="Block size">
+                    <form:textbox/>
+                </form:entry>
+            </td>
+        </tr>
+    </table>
+</jelly:jelly>
