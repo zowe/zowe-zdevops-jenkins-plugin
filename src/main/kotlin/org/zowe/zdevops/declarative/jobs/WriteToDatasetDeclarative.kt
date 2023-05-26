@@ -18,7 +18,7 @@ import hudson.model.Run
 import hudson.model.TaskListener
 import org.jenkinsci.Symbol
 import org.kohsuke.stapler.DataBoundConstructor
-import org.zowe.zdevops.logic.WriteToDatasetOperation.Companion.writeToDataset
+import org.zowe.zdevops.logic.WriteOperation.Companion.writeToDataset
 
 class WriteToDatasetDeclarative @DataBoundConstructor constructor(private val dsn: String,
                                                                   private val text: String) :

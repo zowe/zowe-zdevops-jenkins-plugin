@@ -15,3 +15,11 @@ fun validateDatasetName(dsn: String): FormValidation? {
         FormValidation.error("Field must not be empty")
     }
 }
+
+fun validateFieldIsNotEmpty(value: String): FormValidation? {
+    return if (value == "") {
+        FormValidation.error("Field must not be empty")
+    } else {
+        FormValidation.ok()
+    }
+}

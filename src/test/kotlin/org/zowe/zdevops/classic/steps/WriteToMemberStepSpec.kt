@@ -2,8 +2,8 @@ package org.zowe.zdevops.classic.steps
 
 import hudson.model.Item
 import io.kotest.assertions.assertSoftly
-import io.kotest.assertions.fail
 import io.kotest.core.spec.style.ShouldSpec
+import io.kotest.assertions.fail
 import io.kotest.matchers.shouldBe
 import io.mockk.every
 import io.mockk.mockk
@@ -14,15 +14,12 @@ import org.zowe.kotlinsdk.zowe.client.sdk.core.ZOSConnection
 import org.zowe.zdevops.MOCK_SERVER_HOST
 import org.zowe.zdevops.MockResponseDispatcher
 import org.zowe.zdevops.MockServerFactory
-import org.zowe.zdevops.declarative.jobs.TestBuildListener
-import org.zowe.zdevops.declarative.jobs.TestItemGroup
-import org.zowe.zdevops.declarative.jobs.TestLauncher
-import org.zowe.zdevops.declarative.jobs.TestVirtualChannel
 import java.io.File
 import java.io.PrintStream
 import java.nio.file.Paths
 
-class WriteToDatasetStepSpec : ShouldSpec({
+
+class WriteToMemberStepSpec : ShouldSpec({
     lateinit var mockServer: MockWebServer
     lateinit var responseDispatcher: MockResponseDispatcher
     val mockServerFactory = MockServerFactory()
@@ -34,7 +31,7 @@ class WriteToDatasetStepSpec : ShouldSpec({
     afterSpec {
         mockServerFactory.stopMockServer()
     }
-    context("classic/steps module: WriteToDatasetStep") {
+    context("classic/steps module: WriteToMemberStep") {
         val virtualChannel = TestVirtualChannel()
         val zosConnection = ZOSConnection(mockServer.hostName, mockServer.port.toString(), "test", "test", "https")
         val rootDir = Paths.get("").toAbsolutePath().toString()
@@ -50,7 +47,7 @@ class WriteToDatasetStepSpec : ShouldSpec({
         afterEach {
             responseDispatcher.removeAllEndpoints()
         }
-        should("perform WriteToDatasetStep operation to write text to a dataset") {
+        should("perform WriteToMemberStep operation to write text to a member") {
             var isWritingToDataset = false
             var isWritten = false
             val taskListener = object : TestBuildListener() {
@@ -78,7 +75,7 @@ class WriteToDatasetStepSpec : ShouldSpec({
             )
 
             val writeTextToDatasetDecl = spyk(
-                WriteToDatasetStep("test", "TEST.IJMP.DATASET1", "TEXT TO WRITE")
+                WriteToMemberStep("test", "TEST.IJMP.DATASET1", "#1", "TEXT")
             )
             writeTextToDatasetDecl.perform(
                 build,

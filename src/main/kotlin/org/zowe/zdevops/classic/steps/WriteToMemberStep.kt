@@ -10,15 +10,16 @@ import org.kohsuke.stapler.QueryParameter
 import org.zowe.kotlinsdk.zowe.client.sdk.core.ZOSConnection
 import org.zowe.zdevops.Messages
 import org.zowe.zdevops.classic.AbstractBuildStep
-import org.zowe.zdevops.logic.WriteOperation.Companion.writeToDataset
+import org.zowe.zdevops.logic.WriteOperation.Companion.writeToMember
 import org.zowe.zdevops.utils.validateDatasetName
 import org.zowe.zdevops.utils.validateFieldIsNotEmpty
 
-class WriteToDatasetStep
+class WriteToMemberStep
 @DataBoundConstructor
 constructor(
     connectionName: String,
     val dsn: String,
+    val member: String,
     val text: String
 ) : AbstractBuildStep(connectionName) {
 
@@ -28,11 +29,11 @@ constructor(
         listener: BuildListener,
         zosConnection: ZOSConnection
     ) {
-        writeToDataset(listener, zosConnection, dsn, text)
+        writeToMember(listener, zosConnection, dsn, member, text)
     }
 
     @Extension
-    class DescriptorImpl : Companion.DefaultBuildDescriptor(Messages.zdevops_classic_writeToDSStep_display_name()) {
+    class DescriptorImpl : Companion.DefaultBuildDescriptor(Messages.zdevops_classic_writeToMemberStep_display_name()) {
         fun doCheckDsn(@QueryParameter dsn: String): FormValidation? {
             return validateDatasetName(dsn)
         }
@@ -41,5 +42,9 @@ constructor(
             return validateFieldIsNotEmpty(text)
         }
 
+        fun doCheckMember(@QueryParameter member: String): FormValidation? {
+            if (member.length > 8) return FormValidation.error("Member name can not exceed 8 characters")
+            return validateFieldIsNotEmpty(member)
+        }
     }
 }
