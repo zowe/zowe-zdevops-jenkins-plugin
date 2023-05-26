@@ -30,19 +30,6 @@ constructor(
   val primary: Int = 1,
   var secondary: Int,
   var recFm: RecordFormat,
-
-//  var volser: String?,
-//  var unit: String?,
-//  var alcUnit : AllocationUnit?,
-//  var dirBlk : Int?,
-//  var blkSize: Int?,
-//  var lrecl: Int?,
-//  var storClass: String?,
-//  var mgntClass: String?,
-//  var dataClass: String?,
-//  var avgBlk: Int?,
-//  var dsnType: DsnameType?,
-//  var dsModel: String?,
 ) : AbstractBuildStep(connectionName){
 
   private var volser: String? = null

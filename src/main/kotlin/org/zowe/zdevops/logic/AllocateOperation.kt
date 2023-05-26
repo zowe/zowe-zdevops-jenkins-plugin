@@ -1,12 +1,10 @@
 package org.zowe.zdevops.logic
 
 import hudson.model.TaskListener
-import org.jenkinsci.remoting.SerializableOnlyOverRemoting
 import org.zowe.kotlinsdk.*
 import org.zowe.kotlinsdk.zowe.client.sdk.core.ZOSConnection
 import org.zowe.kotlinsdk.zowe.client.sdk.zosfiles.ZosDsn
 import org.zowe.zdevops.Messages
-import org.zowe.zdevops.utils.runMFTryCatchWrappedQuery
 
 class AllocateOperation {
 

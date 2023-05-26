@@ -58,14 +58,5 @@ constructor(
 
   @Extension
   class DescriptorImpl : Companion.DefaultBuildDescriptor(Messages.zdevops_classic_submitJobStep_display_name()) {
-    fun doFillConnectionNameItems(): ListBoxModel {
-      val result = ListBoxModel()
-
-      GlobalConfiguration.all().get(ZOSConnectionList::class.java)?.connections?.forEach {
-        result.add("${it.name} - (${it.url})", it.name)
-      }
-
-      return result
-    }
   }
 }
