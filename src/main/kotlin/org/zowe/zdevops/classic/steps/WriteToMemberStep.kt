@@ -13,6 +13,7 @@ import org.zowe.zdevops.classic.AbstractBuildStep
 import org.zowe.zdevops.logic.WriteOperation.Companion.writeToMember
 import org.zowe.zdevops.utils.validateDatasetName
 import org.zowe.zdevops.utils.validateFieldIsNotEmpty
+import org.zowe.zdevops.utils.validateMemberName
 
 class WriteToMemberStep
 @DataBoundConstructor
@@ -43,8 +44,7 @@ constructor(
         }
 
         fun doCheckMember(@QueryParameter member: String): FormValidation? {
-            if (member.length > 8) return FormValidation.error("Member name can not exceed 8 characters")
-            return validateFieldIsNotEmpty(member)
+            return validateMemberName(member) ?: validateFieldIsNotEmpty(member)
         }
     }
 }

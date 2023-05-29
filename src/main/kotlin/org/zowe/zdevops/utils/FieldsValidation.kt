@@ -16,6 +16,10 @@ fun validateDatasetName(dsn: String): FormValidation? {
     }
 }
 
+fun validateMemberName(member: String): FormValidation? {
+    return if (member.length > 8) FormValidation.error("Member name can not exceed 8 characters") else null
+}
+
 fun validateFieldIsNotEmpty(value: String): FormValidation? {
     return if (value == "") {
         FormValidation.error("Field must not be empty")

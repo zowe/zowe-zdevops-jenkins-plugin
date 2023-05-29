@@ -1,0 +1,81 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<?jelly escape-by-default='true'?>
+
+<jelly:jelly xmlns:jelly="jelly:core" xmlns:form="/lib/form">
+    <head>
+        <style>
+            #fileContentTextArea {
+                height: 135px;
+                resize: vertical;
+            }
+        </style>
+    </head>
+    <script>
+        function toggleFileFields(fileOption) {
+            const fileContent = document.getElementById('fileContentTextArea');
+            const fileInput = document.getElementById('fileInput');
+            const workspacePath = document.getElementById('workspacePath');
+            if (fileOption == "file") {
+                document.getElementById("localFileFields").style.display = "block";
+                document.getElementById("workspaceFileFields").style.display = "none";
+                workspacePath.value = ""
+            } else if (fileOption == "path") {
+                document.getElementById("localFileFields").style.display = "none";
+                document.getElementById("workspaceFileFields").style.display = "block";
+                fileContent.value = ""
+                fileInput.value = ""
+            } else {
+                document.getElementById("localFileFields").style.display = "none";
+                document.getElementById("workspaceFileFields").style.display = "none";
+                fileContent.value = ""
+                workspacePath.value = ""
+                fileInput.value = ""
+            }
+        }
+
+        function handleFileSelect(event) {
+            const file = event.target.files[0];
+            const reader = new FileReader();
+
+            reader.onload = function(event) {
+                const fileContent = event.target.result;
+                const textarea = document.getElementById('fileContentTextArea');
+                textarea.value = fileContent;
+            };
+
+            reader.readAsText(file);
+        }
+    </script>
+    <form method="POST" enctype="multipart/form-data" action="/plugin/zdevops/submit">
+        <form:entry field="connectionName" title="${%zdevops.classic.connection.title}">
+            <form:select/>
+        </form:entry>
+        <form:entry field="dsn" title="${%zdevops.classic.datasetName.title}">
+            <form:textbox/>
+        </form:entry>
+        <form:entry field="member" title="${%zdevops.classic.member.title}">
+            <form:textbox/>
+        </form:entry>
+        <form:entry title="${%zdevops.classic.fileOption.title}" description="${%zdevops.classic.fileOption.description}">
+            <form:select field="fileOption" id="fileOption"
+                            onchange="toggleFileFields(this.value)"/>
+        </form:entry>
+        <div id="localFileFields" style="display:none;">
+            <form:entry field="file" title="${%zdevops.classic.file.title}">
+                <input type="file" id="fileInput" onchange="handleFileSelect(event)" />
+            </form:entry>
+            <form:entry field="fileContent" title="${%zdevops.classic.fileContent.title}" description="${%zdevops.classic.fileContent.description}">
+                <form:textarea id="fileContentTextArea" readonly="true"/>
+            </form:entry>
+        </div>
+        <div id="workspaceFileFields" style="display:none;">
+            <form:entry field="workspacePath" title="${%zdevops.classic.workspacePath.title}">
+                <form:textbox id="workspacePath"/>
+            </form:entry>
+        </div>
+    </form>
+    <script>
+        toggleFileFields(document.getElementById('fileOption').value)
+    </script>
+</jelly:jelly>
