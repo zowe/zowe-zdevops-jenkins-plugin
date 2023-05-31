@@ -14,19 +14,16 @@ import org.kohsuke.stapler.bind.JavaScriptMethod
 import org.zowe.kotlinsdk.zowe.client.sdk.core.ZOSConnection
 import org.zowe.zdevops.Messages
 import org.zowe.zdevops.classic.AbstractBuildStep
-import org.zowe.zdevops.logic.WriteOperation.Companion.writeToMember
+import org.zowe.zdevops.logic.WriteOperation.Companion.writeToDataset
 import org.zowe.zdevops.utils.validateDatasetName
 import org.zowe.zdevops.utils.validateFieldIsNotEmpty
-import org.zowe.zdevops.utils.validateMemberName
 import java.io.File
 
-
-class WriteFileToMemberStep
+class WriteFileToDatasetStep
 @DataBoundConstructor
 constructor(
     connectionName: String,
     val dsn: String,
-    val member: String,
     var fileOption: String?,
 ): AbstractBuildStep(connectionName) {
 
@@ -52,7 +49,7 @@ constructor(
         build: AbstractBuild<*, *>,
         launcher: Launcher,
         listener: BuildListener,
-        zosConnection: ZOSConnection,
+        zosConnection: ZOSConnection
     ) {
         val workspace = build.executor?.currentWorkspace
         val file = when (fileOption) {
@@ -65,16 +62,16 @@ constructor(
         }
         listener.logger.println(Messages.zdevops_declarative_writing_DS_from_file(dsn, file.name, zosConnection.host, zosConnection.zosmfPort))
         val fileContent = file.readText()
-        writeToMember(listener, zosConnection, dsn, member, fileContent)
+        writeToDataset(listener, zosConnection, dsn, fileContent)
     }
 
 
     @Extension
     class DescriptorImpl :
-        Companion.DefaultBuildDescriptor(Messages.zdevops_classic_writeFileToMemberStep_display_name()) {
+        Companion.DefaultBuildDescriptor(Messages.zdevops_classic_writeFileToDatasetStep_display_name()) {
 
         private var lastStepId = 0
-        private val marker: String = "WFTM"
+        private val marker: String = "WFTD"
 
         val chooseFileOption = "choose"
         val localFileOption = "local"
@@ -105,20 +102,16 @@ constructor(
             return validateDatasetName(dsn)
         }
 
-        fun doCheckMember(@QueryParameter member: String): FormValidation? {
-            return validateMemberName(member)?: validateFieldIsNotEmpty(member)
-        }
-
         fun doCheckLocalFilePath(@QueryParameter localFilePath: String,
                                  @QueryParameter fileOption:    String): FormValidation? {
             return if (fileOption == localFileOption) validateFieldIsNotEmpty(localFilePath)
-                   else FormValidation.ok()
+            else FormValidation.ok()
         }
 
         fun doCheckWorkspacePath(@QueryParameter workspacePath: String,
                                  @QueryParameter fileOption:    String): FormValidation? {
             return if (fileOption == workspaceFileOption) validateFieldIsNotEmpty(workspacePath)
-                   else FormValidation.ok()
+            else FormValidation.ok()
         }
 
     }
