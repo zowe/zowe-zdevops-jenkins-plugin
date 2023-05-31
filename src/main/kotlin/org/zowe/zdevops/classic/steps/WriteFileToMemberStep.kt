@@ -2,20 +2,25 @@ package org.zowe.zdevops.classic.steps
 
 import hudson.AbortException
 import hudson.Extension
-import hudson.FilePath
 import hudson.Launcher
 import hudson.model.AbstractBuild
 import hudson.model.BuildListener
 import hudson.util.FormValidation
 import hudson.util.ListBoxModel
-import org.kohsuke.stapler.*
+import org.kohsuke.stapler.DataBoundConstructor
+import org.kohsuke.stapler.DataBoundSetter
+import org.kohsuke.stapler.QueryParameter
+import org.kohsuke.stapler.bind.JavaScriptMethod
+import org.zowe.kotlinsdk.Dataset
 import org.zowe.kotlinsdk.zowe.client.sdk.core.ZOSConnection
 import org.zowe.kotlinsdk.zowe.client.sdk.zosfiles.ZosDsn
 import org.zowe.zdevops.Messages
 import org.zowe.zdevops.classic.AbstractBuildStep
-import org.zowe.zdevops.utils.*
+import org.zowe.zdevops.utils.runMFTryCatchWrappedQuery
+import org.zowe.zdevops.utils.validateDatasetName
+import org.zowe.zdevops.utils.validateFieldIsNotEmpty
+import org.zowe.zdevops.utils.validateMemberName
 import java.io.File
-import java.util.*
 
 
 class WriteFileToMemberStep
@@ -24,24 +29,22 @@ constructor(
     connectionName: String,
     val dsn: String,
     val member: String,
-    val fileOption: String,
+    var fileOption: String?,
 ): AbstractBuildStep(connectionName) {
 
-    private var fileContent: String? = null
+    private var localFilePath: String? = null
     private var workspacePath: String? = null
 
     @DataBoundSetter
-    fun setFileContent(fileContent: String?) {
-        this.fileContent = fileContent
-        this.workspacePath = null
+    fun setLocalFilePath(localFilePath: String?) {
+        this.localFilePath = localFilePath
     }
     @DataBoundSetter
     fun setWorkspacePath(workspacePath: String?) {
         this.workspacePath = workspacePath
-        this.fileContent = null
     }
-    fun getFileContent(): String? {
-        return this.fileContent
+    fun getLocalFilePath(): String? {
+        return this.localFilePath
     }
     fun getWorkspacePath(): String? {
         return this.workspacePath
@@ -51,41 +54,33 @@ constructor(
         build: AbstractBuild<*, *>,
         launcher: Launcher,
         listener: BuildListener,
-        zosConnection: ZOSConnection
+        zosConnection: ZOSConnection,
     ) {
-        val fileNameForLog = if (workspacePath == null) "" else workspacePath
-        listener.logger.println(Messages.zdevops_declarative_writing_DS_from_file(dsn, fileNameForLog, zosConnection.host, zosConnection.zosmfPort))
-
-        val currentWorkspace: FilePath? = build.getExecutor()?.currentWorkspace
-        val currentWorkspacePath = currentWorkspace?.remote?.replace(currentWorkspace.name, "")
-        val randomName = UUID.randomUUID().toString().replace("-", "")
-        val textFile: File =  if (fileOption == "path") {
-            File("$currentWorkspacePath$workspacePath")
-        } else {
-            createFileAndWriteContent("$currentWorkspacePath/$randomName", fileContent!!)
+        val workspace = build.executor?.currentWorkspace
+        val file = when (fileOption) {
+            DescriptorImpl().localFileOption -> File(localFilePath)
+            DescriptorImpl().workspaceFileOption ->  {
+                val fileWorkspacePath = workspace?.remote?.replace(workspace.name, "") + workspacePath
+                File(fileWorkspacePath)
+            }
+            else        -> throw AbortException(Messages.zdevops_classic_write_options_invalid())
         }
-
-        val targetDS = ZosDsn(zosConnection).getDatasetInfo(dsn)
-        val targetDSLRECL =
-            targetDS.recordLength ?: throw AbortException(Messages.zdevops_declarative_writing_DS_no_info(dsn))
-        val ineligibleStrings = textFile
+        listener.logger.println(Messages.zdevops_declarative_writing_DS_from_file(dsn, file.name, zosConnection.host, zosConnection.zosmfPort))
+        var targetDS: Dataset? = null
+        runMFTryCatchWrappedQuery(listener) {
+            targetDS = ZosDsn(zosConnection).getDatasetInfo(dsn)
+        }
+        val targetDSLRECL = targetDS?.recordLength ?: throw AbortException(Messages.zdevops_declarative_writing_DS_no_info(dsn))
+        val ineligibleStrings = file
             .readLines()
             .map { it.length }
             .fold(0) { result, currStrLength -> if (currStrLength > targetDSLRECL) result + 1 else result }
         if (ineligibleStrings > 0) {
             throw AbortException(Messages.zdevops_declarative_writing_DS_ineligible_strings(ineligibleStrings, dsn))
         }
-        val textString = textFile.readText().replace("\r", "")
-        runMFTryCatchWrappedQuery(listener) {
-            ZosDsn(zosConnection).writeDsn(dsn, member, textString.toByteArray())
-        }
-
-        if (fileOption == "file") {
-            deleteFile("$currentWorkspacePath/$randomName", listener.logger)
-        }
-
+        val textString = file.readText().replace("\r","")
+        ZosDsn(zosConnection).writeDsn(dsn, member, textString.toByteArray())
         listener.logger.println(Messages.zdevops_declarative_writing_DS_success(dsn))
-
     }
 
 
@@ -93,21 +88,31 @@ constructor(
     class DescriptorImpl :
         Companion.DefaultBuildDescriptor(Messages.zdevops_classic_writeFileToMemberStep_display_name()) {
 
-        override fun save() {
-            super.save()
+        private var lastStepId = 0
+        private val marker: String = "WFTM"
+
+        val chooseFileOption = "choose"
+        val localFileOption = "local"
+        val workspaceFileOption = "workspace"
+
+        @JavaScriptMethod
+        @Synchronized
+        fun createStepId(): String {
+            return marker + lastStepId++.toString()
         }
+
         fun doFillFileOptionItems(): ListBoxModel {
             val result = ListBoxModel()
 
-            result.add("Choose file option", "")
-            result.add("Choose Local File", "file")
-            result.add("Specify Workspace Path", "path")
+            result.add(Messages.zdevops_classic_write_options_choose(), chooseFileOption)
+            result.add(Messages.zdevops_classic_write_options_local(), localFileOption)
+            result.add(Messages.zdevops_classic_write_options_workspace(), workspaceFileOption)
 
             return result
         }
 
         fun doCheckFileOption(@QueryParameter fileOption: String): FormValidation? {
-            if (fileOption.isEmpty()) return FormValidation.error("Select field is required")
+            if (fileOption == chooseFileOption || fileOption.isEmpty()) return FormValidation.error(Messages.zdevops_classic_write_options_required())
             return FormValidation.ok()
         }
 
@@ -119,8 +124,16 @@ constructor(
             return validateMemberName(member)?: validateFieldIsNotEmpty(member)
         }
 
-        fun doCheckFile(@QueryParameter file: String): FormValidation? {
-            return validateFieldIsNotEmpty(file)
+        fun doCheckLocalFilePath(@QueryParameter localFilePath: String,
+                                 @QueryParameter fileOption:    String): FormValidation? {
+            return if (fileOption == localFileOption) validateFieldIsNotEmpty(localFilePath)
+                   else FormValidation.ok()
+        }
+
+        fun doCheckWorkspacePath(@QueryParameter workspacePath: String,
+                                 @QueryParameter fileOption:    String): FormValidation? {
+            return if (fileOption == workspaceFileOption) validateFieldIsNotEmpty(workspacePath)
+                   else FormValidation.ok()
         }
 
     }
