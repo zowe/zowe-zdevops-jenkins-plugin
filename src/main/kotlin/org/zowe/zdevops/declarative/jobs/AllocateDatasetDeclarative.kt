@@ -25,11 +25,28 @@ import org.kohsuke.stapler.DataBoundSetter
 import org.zowe.zdevops.Messages
 import org.zowe.zdevops.logic.AllocateOperation.Companion.allocateDataset
 
-class AllocateDatasetDeclarative @DataBoundConstructor constructor(private val dsn: String,
-                                                                   private val dsOrg: DatasetOrganization,
-                                                                   private val primary: Int,
-                                                                   private var secondary: Int,
-                                                                   private var recFm: RecordFormat) :
+/**
+ * Represents an action for allocating a dataset in a declarative style
+ *
+ * @see org.zowe.zdevops.logic.AllocateOperation
+ */
+class AllocateDatasetDeclarative
+/**
+ * Constructs a new instance of AllocateDatasetDeclarative
+ *
+ * @param dsn The name of the dataset to be allocated
+ * @param dsOrg The dataset organization
+ * @param primary The primary allocation size in cylinders or tracks
+ * @param secondary The secondary allocation size in cylinders or tracks
+ * @param recFm The record format
+ */
+@DataBoundConstructor
+constructor(
+   private val dsn: String,
+   private val dsOrg: DatasetOrganization,
+   private val primary: Int,
+   private var secondary: Int,
+   private var recFm: RecordFormat) :
     AbstractZosmfAction() {
 
     private var volser: String? = null
@@ -72,6 +89,16 @@ class AllocateDatasetDeclarative @DataBoundConstructor constructor(private val d
 
     override val exceptionMessage: String = Messages.zdevops_declarative_DSN_allocated_fail(dsn)
 
+    /**
+     * Performs the allocation of the dataset
+     *
+     * @param run The current build/run
+     * @param workspace The workspace where the build is being executed
+     * @param env The environment variables for the build
+     * @param launcher The launcher for executing commands
+     * @param listener The listener for logging messages
+     * @param zosConnection The ZOSConnection for interacting with z/OS
+     */
     override fun perform(
         run: Run<*, *>,
         workspace: FilePath,
@@ -104,6 +131,9 @@ class AllocateDatasetDeclarative @DataBoundConstructor constructor(private val d
     }
 
 
+    /**
+     * The DescriptorImpl class represents the descriptor for the AllocateDatasetDeclarative class
+     */
     @Symbol("allocateDS")
     @Extension
     class DescriptorImpl : Companion.DefaultBuildDescriptor("Allocate Dataset Declarative")

@@ -17,9 +17,21 @@ import org.zowe.kotlinsdk.zowe.client.sdk.zosfiles.ZosDsn
 import org.zowe.zdevops.Messages
 import org.zowe.zdevops.utils.runMFTryCatchWrappedQuery
 
+/**
+ * The class is for performing write operations on datasets, members and USS files
+ */
 class WriteOperation {
     companion object {
 
+        /**
+         * Validates the text to be written to a dataset
+         *
+         * @param listener      The listener for logging messages
+         * @param zosConnection The ZOSConnection for interacting with z/OS
+         * @param dsn           The name of the dataset
+         * @param text          The text content to be written
+         * @throws AbortException if the text is empty or contains ineligible strings.
+         */
         private fun validateTextForDataset(
             listener: TaskListener,
             zosConnection: ZOSConnection,
@@ -48,6 +60,15 @@ class WriteOperation {
             }
         }
 
+        /**
+         * Writes the text content to a dataset
+         *
+         * @param listener      The listener for logging messages
+         * @param zosConnection The ZOSConnection for interacting with z/OS
+         * @param dsn           The name of the dataset
+         * @param text          The text content to be written
+         * @throws AbortException if the text is not valid for the dataset or an error occurs during the write operation
+         */
         fun writeToDataset(listener: TaskListener,
                            zosConnection: ZOSConnection,
                            dsn: String,
@@ -61,6 +82,17 @@ class WriteOperation {
             listener.logger.println(Messages.zdevops_declarative_writing_DS_success(dsn))
         }
 
+
+        /**
+         * Writes the text content to a member
+         *
+         * @param listener      The listener for logging messages
+         * @param zosConnection The ZOSConnection for interacting with z/OS
+         * @param dsn           The name of the dataset
+         * @param member        The name of the member
+         * @param text          The text content to be written
+         * @throws AbortException if the text is not valid for the dataset or an error occurs during the write operation
+         */
         fun writeToMember(listener: TaskListener,
                           zosConnection: ZOSConnection,
                           dsn: String,

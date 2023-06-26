@@ -29,7 +29,19 @@ import org.zowe.zdevops.utils.validateDatasetName
 import org.zowe.zdevops.utils.validateFieldIsNotEmpty
 import java.io.File
 
+/**
+ * A build step for writing a file to a dataset
+ *
+ * @see org.zowe.zdevops.logic.WriteOperation
+ */
 class WriteFileToDatasetStep
+/**
+ * Constructs a new instance of WriteFileToDatasetStep.
+ *
+ * @param connectionName The name of the connection
+ * @param dsn The name of the dataset
+ * @param fileOption The option for selecting the file source (jenkins workspace file or local one)
+ */
 @DataBoundConstructor
 constructor(
     connectionName: String,
@@ -55,6 +67,14 @@ constructor(
         return this.workspacePath
     }
 
+    /**
+     * Performs the write operation.
+     *
+     * @param build The build object
+     * @param launcher The launcher for executing commands
+     * @param listener The listener for logging messages
+     * @param zosConnection The ZOSConnection for interacting with z/OS
+     */
     override fun perform(
         build: AbstractBuild<*, *>,
         launcher: Launcher,
@@ -75,7 +95,9 @@ constructor(
         writeToDataset(listener, zosConnection, dsn, fileContent)
     }
 
-
+    /**
+     * The descriptor for the WriteFileToDatasetStep
+     */
     @Extension
     class DescriptorImpl :
         Companion.DefaultBuildDescriptor(Messages.zdevops_classic_writeFileToDatasetStep_display_name()) {
@@ -87,12 +109,22 @@ constructor(
         val localFileOption = "local"
         val workspaceFileOption = "workspace"
 
+        /**
+         * Creates a unique step ID
+         *
+         * @return The generated step ID
+         */
         @JavaScriptMethod
         @Synchronized
         fun createStepId(): String {
             return marker + lastStepId++.toString()
         }
 
+        /**
+         * Fills the file option items for the dropdown menu
+         *
+         * @return The ListBoxModel containing the file option items
+         */
         fun doFillFileOptionItems(): ListBoxModel {
             val result = ListBoxModel()
 
@@ -103,21 +135,47 @@ constructor(
             return result
         }
 
+        /**
+         * Checks if the file option is valid
+         *
+         * @param fileOption The selected file option
+         * @return FormValidation.ok() if the file option is valid, or an error message otherwise
+         */
         fun doCheckFileOption(@QueryParameter fileOption: String): FormValidation? {
             if (fileOption == chooseFileOption || fileOption.isEmpty()) return FormValidation.error(Messages.zdevops_classic_write_options_required())
             return FormValidation.ok()
         }
 
+        /**
+         * Checks if the dataset name is valid
+         *
+         * @param dsn The dataset name
+         * @return FormValidation.ok() if the dataset name is valid, or an error message otherwise
+         */
         fun doCheckDsn(@QueryParameter dsn: String): FormValidation? {
             return validateDatasetName(dsn)
         }
 
+        /**
+         * Checks if the local file path not empty
+         *
+         * @param localFilePath The local file path
+         * @param fileOption The selected file option
+         * @return FormValidation.ok() if the local file path is not empty, or an error message otherwise
+         */
         fun doCheckLocalFilePath(@QueryParameter localFilePath: String,
                                  @QueryParameter fileOption:    String): FormValidation? {
             return if (fileOption == localFileOption) validateFieldIsNotEmpty(localFilePath)
             else FormValidation.ok()
         }
 
+        /**
+         * Checks if the workspace path is not empty
+         *
+         * @param workspacePath The workspace path
+         * @param fileOption The selected file option
+         * @return FormValidation.ok() if the workspace path is not empty, or an error message otherwise
+         */
         fun doCheckWorkspacePath(@QueryParameter workspacePath: String,
                                  @QueryParameter fileOption:    String): FormValidation? {
             return if (fileOption == workspaceFileOption) validateFieldIsNotEmpty(workspacePath)

@@ -25,7 +25,18 @@ import org.zowe.zdevops.utils.validateDatasetName
 import org.zowe.zdevops.utils.validateFieldIsNotEmpty
 import org.zowe.zdevops.utils.validateMemberName
 
+/**
+ * A build step for writing text to a member of a dataset
+ */
 class WriteToMemberStep
+/**
+ * Constructs a new instance of WriteToMemberStep
+ *
+ * @param connectionName The name of the connection
+ * @param dsn The name of the dataset
+ * @param member The name of the member within the dataset
+ * @param text The text to write to the member
+ */
 @DataBoundConstructor
 constructor(
     connectionName: String,
@@ -34,6 +45,14 @@ constructor(
     val text: String
 ) : AbstractBuildStep(connectionName) {
 
+    /**
+     * Performs the write operation
+     *
+     * @param build The build object
+     * @param launcher The launcher for executing commands
+     * @param listener The listener for logging messages
+     * @param zosConnection The ZOSConnection for interacting with z/OS
+     */
     override fun perform(
         build: AbstractBuild<*, *>,
         launcher: Launcher,
@@ -43,16 +62,37 @@ constructor(
         writeToMember(listener, zosConnection, dsn, member, text)
     }
 
+    /**
+     * The descriptor for the WriteToMemberStep.
+     */
     @Extension
     class DescriptorImpl : Companion.DefaultBuildDescriptor(Messages.zdevops_classic_writeToMemberStep_display_name()) {
+        /**
+         * Validates the dataset name
+         *
+         * @param dsn The dataset name
+         * @return FormValidation.ok() if the dataset name is valid, or an error message otherwise
+         */
         fun doCheckDsn(@QueryParameter dsn: String): FormValidation? {
             return validateDatasetName(dsn)
         }
 
+        /**
+         * Validates the text to write
+         *
+         * @param text The text to write
+         * @return FormValidation.ok() if the text is not empty, or an error message otherwise
+         */
         fun doCheckText(@QueryParameter text: String): FormValidation? {
             return validateFieldIsNotEmpty(text)
         }
 
+        /**
+         * Validates the member name
+         *
+         * @param member The member name
+         * @return FormValidation.ok() if the member name is valid, or an error message otherwise
+         */
         fun doCheckMember(@QueryParameter member: String): FormValidation? {
             return validateMemberName(member) ?: validateFieldIsNotEmpty(member)
         }

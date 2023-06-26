@@ -31,7 +31,22 @@ import org.zowe.zdevops.utils.validateDatasetName
 import java.io.IOException
 import javax.servlet.ServletException
 
+/**
+ * This class represents a build step that allocates a dataset
+ *
+ * @see org.zowe.zdevops.logic.AllocateOperation
+ */
 class AllocateDatasetStep
+/**
+ * Constructs a new instance of AllocateDatasetStep
+ *
+ * @param connectionName The name of the z/OS connection
+ * @param dsn The name of the dataset to be allocated
+ * @param dsOrg The dataset organization
+ * @param primary The primary allocation size in cylinders or tracks
+ * @param secondary The secondary allocation size in cylinders or tracks
+ * @param recFm The record format
+ */
 @DataBoundConstructor
 constructor(
   connectionName: String,
@@ -129,6 +144,14 @@ constructor(
     return dsModel
   }
 
+  /**
+   * Performs the dataset allocation build step
+   *
+   * @param build The current build
+   * @param launcher The launcher
+   * @param listener The build listener
+   * @param zosConnection The z/OS connection
+   */
   override fun perform(
     build: AbstractBuild<*, *>,
     launcher: Launcher,
@@ -158,10 +181,17 @@ constructor(
     )
   }
 
-
+  /**
+   * The DescriptorImpl class represents the descriptor for the AllocateDatasetStep class
+   */
   @Extension
   class DescriptorImpl : Companion.DefaultBuildDescriptor(Messages.zdevops_classic_allocateDatasetStep_display_name()) {
 
+    /**
+     * Fills the allocation unit dropdown list with options
+     *
+     * @return The list box model for the allocation unit dropdown
+     */
     fun doFillAlcUnitItems(): ListBoxModel {
       val result = ListBoxModel()
 
@@ -171,6 +201,11 @@ constructor(
       return result
     }
 
+    /**
+     * Fills the record format dropdown list with options
+     *
+     * @return The list box model for the record format dropdown
+     */
     fun doFillRecFmItems(): ListBoxModel {
       val result = ListBoxModel()
 
@@ -184,6 +219,11 @@ constructor(
       return result
     }
 
+    /**
+     * Fills the dataset name type dropdown list with options
+     *
+     * @return The list box model for the dataset name type dropdown
+     */
     fun doFillDsnTypeItems(): ListBoxModel {
       val result = ListBoxModel()
 
@@ -198,6 +238,11 @@ constructor(
       return result
     }
 
+    /**
+     * Fills the dataset organization dropdown list with options
+     *
+     * @return The list box model for the dataset organization dropdown
+     */
     fun doFillDsOrgItems(): ListBoxModel {
       val result = ListBoxModel()
 
@@ -208,6 +253,13 @@ constructor(
       return result
     }
 
+    /**
+     * Validates the block size field
+     *
+     * @param lrecl The record length
+     * @param blkSize The block size
+     * @return The validation result
+     */
     @Throws(IOException::class, ServletException::class)
     fun doCheckBlkSize(@QueryParameter lrecl: String, @QueryParameter blkSize: String): FormValidation? {
       if (lrecl.isEmpty()) return FormValidation.ok()
@@ -223,18 +275,42 @@ constructor(
       }
     }
 
+    /**
+     * Validates the dataset name field
+     *
+     * @param dsn The dataset name
+     * @return The validation result
+     */
     fun doCheckDsn(@QueryParameter dsn: String): FormValidation? {
       return validateDatasetName(dsn)
     }
 
+    /**
+     * Performs validation for the primary allocation size
+     *
+     * @param primary The value of the primary allocation size
+     * @return The validation result
+     */
     fun doCheckPrimary(@QueryParameter primary: String): FormValidation? {
       return convertStringAndValidateIntPositive(primary)
     }
 
+    /**
+     * Performs validation for the secondary allocation size
+     *
+     * @param secondary The value of the secondary allocation size
+     * @return The validation result
+     */
     fun doCheckSecondary(@QueryParameter secondary: String): FormValidation? {
       return convertStringAndValidateIntPositive(secondary)
     }
 
+    /**
+     * Converts a string value to an integer and validates that it is a positive number
+     *
+     * @param value The value to be converted and validated
+     * @return The validation result as a FormValidation object
+     */
     fun convertStringAndValidateIntPositive(value: String): FormValidation? {
       if (value.isEmpty()) return FormValidation.ok()
       return try {

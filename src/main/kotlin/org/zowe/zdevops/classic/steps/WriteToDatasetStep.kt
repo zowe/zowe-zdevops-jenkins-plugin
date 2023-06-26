@@ -24,7 +24,17 @@ import org.zowe.zdevops.logic.WriteOperation.Companion.writeToDataset
 import org.zowe.zdevops.utils.validateDatasetName
 import org.zowe.zdevops.utils.validateFieldIsNotEmpty
 
+/**
+ * A build step for writing text(string) to a dataset
+ */
 class WriteToDatasetStep
+/**
+ * Constructs a new instance of WriteToDatasetStep
+ *
+ * @param connectionName The name of the connection
+ * @param dsn The name of the dataset
+ * @param text The text to write to the dataset
+ */
 @DataBoundConstructor
 constructor(
     connectionName: String,
@@ -32,6 +42,14 @@ constructor(
     val text: String
 ) : AbstractBuildStep(connectionName) {
 
+    /**
+     * Performs the write operation
+     *
+     * @param build The build object
+     * @param launcher The launcher for executing commands
+     * @param listener The listener for logging messages
+     * @param zosConnection The ZOSConnection for interacting with z/OS
+     */
     override fun perform(
         build: AbstractBuild<*, *>,
         launcher: Launcher,
@@ -41,12 +59,27 @@ constructor(
         writeToDataset(listener, zosConnection, dsn, text)
     }
 
+    /**
+     * The descriptor for the WriteToDatasetStep
+     */
     @Extension
     class DescriptorImpl : Companion.DefaultBuildDescriptor(Messages.zdevops_classic_writeToDSStep_display_name()) {
+        /**
+         * Validates the dataset name
+         *
+         * @param dsn The dataset name
+         * @return FormValidation.ok() if the dataset name is valid, or an error message otherwise
+         */
         fun doCheckDsn(@QueryParameter dsn: String): FormValidation? {
             return validateDatasetName(dsn)
         }
 
+        /**
+         * Validates the text to write
+         *
+         * @param text The text to write
+         * @return FormValidation.ok() if the text is not empty, or an error message otherwise
+         */
         fun doCheckText(@QueryParameter text: String): FormValidation? {
             return validateFieldIsNotEmpty(text)
         }
