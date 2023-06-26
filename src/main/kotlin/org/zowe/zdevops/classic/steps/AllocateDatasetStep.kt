@@ -174,12 +174,12 @@ constructor(
     fun doFillRecFmItems(): ListBoxModel {
       val result = ListBoxModel()
 
-      result.add("F")
-      result.add("FB")
-      result.add("V")
-      result.add("VB")
-      result.add("U")
-      result.add("VA")
+      result.add("Fixed-length (F)", "F")
+      result.add("Fixed-length, blocked (FB)","FB")
+      result.add("Variable-length (V)", "V")
+      result.add("Variable-length, blocked (VB)","VB")
+      result.add("Undefined-length (U)", "U")
+      result.add("Variable-length, ASA print control characters (VA)","VA")
 
       return result
     }
@@ -201,9 +201,9 @@ constructor(
     fun doFillDsOrgItems(): ListBoxModel {
       val result = ListBoxModel()
 
-      result.add("PO")
-      result.add("POE")
-      result.add("PS")
+      result.add("Partitioned organized (PO)", "PO")
+      result.add("Partitioned Extended (POE)", "POE")
+      result.add("Physical sequentia (PS)", "PS")
 
       return result
     }
