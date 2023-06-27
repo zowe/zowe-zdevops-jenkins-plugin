@@ -10,33 +10,49 @@
 
 package org.zowe.zdevops.declarative.jobs
 
+import hudson.EnvVars
+import hudson.Extension
 import org.zowe.kotlinsdk.*
 import org.zowe.kotlinsdk.zowe.client.sdk.core.ZOSConnection
-import org.zowe.kotlinsdk.zowe.client.sdk.zosfiles.ZosDsn
 import org.zowe.zdevops.declarative.AbstractZosmfAction
-import hudson.*
 import hudson.FilePath
+import hudson.Launcher
 import hudson.model.Run
 import hudson.model.TaskListener
 import org.jenkinsci.Symbol
 import org.kohsuke.stapler.DataBoundConstructor
 import org.kohsuke.stapler.DataBoundSetter
+import org.zowe.zdevops.Messages
+import org.zowe.zdevops.logic.AllocateOperation.Companion.allocateDataset
 
-class AllocateDatasetDeclarative @DataBoundConstructor constructor(private val dsn: String,
-                                                                   private val dsOrg: DatasetOrganization,
-                                                                   private val primary: Int,
-                                                                   private var secondary: Int,
-                                                                   private var recFm: RecordFormat) :
+/**
+ * Represents an action for allocating a dataset in a declarative style
+ *
+ * @see org.zowe.zdevops.logic.AllocateOperation
+ */
+class AllocateDatasetDeclarative
+/**
+ * Constructs a new instance of AllocateDatasetDeclarative
+ *
+ * @param dsn The name of the dataset to be allocated
+ * @param dsOrg The dataset organization
+ * @param primary The primary allocation size in cylinders or tracks
+ * @param secondary The secondary allocation size in cylinders or tracks
+ * @param recFm The record format
+ */
+@DataBoundConstructor
+constructor(
+   private val dsn: String,
+   private val dsOrg: DatasetOrganization,
+   private val primary: Int,
+   private var secondary: Int,
+   private var recFm: RecordFormat) :
     AbstractZosmfAction() {
 
     private var volser: String? = null
     private var unit: String? = null
-//    private var dsOrg: DatasetOrganization? = null
     private var alcUnit : AllocationUnit? = null
-//    private var primary: Int? = null
-//    private var secondary: Int? = null
     private var dirBlk : Int? = null
-//    private var recFm: RecordFormat? = null
     private var blkSize: Int? = null
     private var lrecl: Int? = null
     private var storClass: String? = null
@@ -50,19 +66,11 @@ class AllocateDatasetDeclarative @DataBoundConstructor constructor(private val d
     fun setVolser(volser: String) { this.volser = volser }
     @DataBoundSetter
     fun setUnit(unit: String) { this.unit = unit }
-//    @DataBoundSetter
-//    fun setDsOrg(dsOrg: DatasetOrganization) { this.dsOrg = dsOrg }
     @DataBoundSetter
     fun setAlcUnit(alcUnit: AllocationUnit) { this.alcUnit = alcUnit }
-//    @DataBoundSetter
-//    fun setPrimary(primary: Int) { this.primary = primary }
-//    @DataBoundSetter
-//    fun setSecondary(secondary: Int) { this.secondary = secondary }
     @DataBoundSetter
     fun setDirBlk(dirBlk: Int) { this.dirBlk = dirBlk }
     @DataBoundSetter
-//    fun setRecFm(recFm: RecordFormat) { this.recFm = recFm }
-//    @DataBoundSetter
     fun setBlkSize(blkSize: Int) { this.blkSize = blkSize }
     @DataBoundSetter
     fun setLrecl(lrecl: Int) { this.lrecl = lrecl }
@@ -79,8 +87,18 @@ class AllocateDatasetDeclarative @DataBoundConstructor constructor(private val d
     @DataBoundSetter
     fun setDsModel(dsModel: String) { this.dsModel = dsModel }
 
-    override val exceptionMessage: String = zMessages.zdevops_declarative_DSN_allocated_fail(dsn)
+    override val exceptionMessage: String = Messages.zdevops_declarative_DSN_allocated_fail(dsn)
 
+    /**
+     * Performs the allocation of the dataset
+     *
+     * @param run The current build/run
+     * @param workspace The workspace where the build is being executed
+     * @param env The environment variables for the build
+     * @param launcher The launcher for executing commands
+     * @param listener The listener for logging messages
+     * @param zosConnection The ZOSConnection for interacting with z/OS
+     */
     override fun perform(
         run: Run<*, *>,
         workspace: FilePath,
@@ -89,8 +107,10 @@ class AllocateDatasetDeclarative @DataBoundConstructor constructor(private val d
         listener: TaskListener,
         zosConnection: ZOSConnection
     ) {
-        listener.logger.println(zMessages.zdevops_declarative_DSN_allocating(dsn, zosConnection.host, zosConnection.zosmfPort))
-        val alcParms = CreateDataset(
+        allocateDataset(
+            listener,
+            zosConnection,
+            dsn,
             volser,
             unit,
             dsOrg,
@@ -108,11 +128,12 @@ class AllocateDatasetDeclarative @DataBoundConstructor constructor(private val d
             dsnType,
             dsModel
         )
-        ZosDsn(zosConnection).createDsn(dsn, alcParms)
-        listener.logger.println(zMessages.zdevops_declarative_DSN_allocated_success(dsn))
     }
 
 
+    /**
+     * The DescriptorImpl class represents the descriptor for the AllocateDatasetDeclarative class
+     */
     @Symbol("allocateDS")
     @Extension
     class DescriptorImpl : Companion.DefaultBuildDescriptor("Allocate Dataset Declarative")

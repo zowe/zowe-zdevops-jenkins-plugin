@@ -11,7 +11,6 @@
 package org.zowe.zdevops.declarative.jobs
 
 import org.zowe.kotlinsdk.zowe.client.sdk.core.ZOSConnection
-import org.zowe.kotlinsdk.zowe.client.sdk.zosfiles.ZosDsn
 import org.zowe.zdevops.declarative.AbstractZosmfAction
 import hudson.*
 import hudson.FilePath
@@ -19,6 +18,7 @@ import hudson.model.Run
 import hudson.model.TaskListener
 import org.jenkinsci.Symbol
 import org.kohsuke.stapler.DataBoundConstructor
+import org.zowe.zdevops.logic.WriteOperation.Companion.writeToMember
 
 class WriteToMemberDeclarative @DataBoundConstructor constructor(private val dsn: String,
                                                                  private val member: String,
@@ -35,30 +35,7 @@ class WriteToMemberDeclarative @DataBoundConstructor constructor(private val dsn
         listener: TaskListener,
         zosConnection: ZOSConnection
     ) {
-        if (text != "") {
-            listener.logger.println(zMessages.zdevops_declarative_writing_DS_from_input(dsn, zosConnection.host, zosConnection.zosmfPort))
-
-            val stringList = text.split('\n')
-            val targetDS = ZosDsn(zosConnection).getDatasetInfo(dsn)
-            if (targetDS.recordLength == null) {
-                throw AbortException(zMessages.zdevops_declarative_writing_DS_no_info(dsn))
-            }
-            var ineligibleStrings = 0
-            stringList.forEach {
-                if (it.length > targetDS.recordLength!!) {
-                    ineligibleStrings++
-                }
-            }
-            if (ineligibleStrings > 0) {
-                throw AbortException(zMessages.zdevops_declarative_writing_DS_ineligible_strings(ineligibleStrings,dsn))
-            } else {
-                val textByteArray = text.replace("\r","").toByteArray()
-                ZosDsn(zosConnection).writeDsn(dsn, member, textByteArray)
-                listener.logger.println(zMessages.zdevops_declarative_writing_DS_success(dsn))
-            }
-        } else {
-            listener.logger.println(zMessages.zdevops_declarative_writing_skip())
-        }
+        writeToMember(listener, zosConnection, dsn, member, text)
     }
 
 

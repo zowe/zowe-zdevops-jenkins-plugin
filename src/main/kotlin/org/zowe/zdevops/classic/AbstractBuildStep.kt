@@ -10,17 +10,26 @@
 
 package org.zowe.zdevops.classic
 
-import org.zowe.kotlinsdk.zowe.client.sdk.core.ZOSConnection
 import hudson.Launcher
+import hudson.model.AbstractBuild
+import hudson.model.AbstractProject
+import hudson.model.BuildListener
 import hudson.tasks.BuildStepDescriptor
 import hudson.tasks.Builder
+import hudson.util.FormValidation
+import hudson.util.ListBoxModel
+import jenkins.model.GlobalConfiguration
 import jenkins.tasks.SimpleBuildStep
+import org.kohsuke.stapler.QueryParameter
+import org.zowe.kotlinsdk.zowe.client.sdk.core.ZOSConnection
+import org.zowe.zdevops.Messages
+import org.zowe.zdevops.config.ZOSConnectionList
+import java.io.IOException
 import java.io.PrintWriter
 import java.io.StringWriter
-import org.zowe.zdevops.config.ZOSConnectionList
-import hudson.model.*
-import org.zowe.zdevops.Messages
 import java.net.URL
+import javax.servlet.ServletException
+
 
 abstract class AbstractBuildStep(private val connectionName: String) : Builder(), SimpleBuildStep {
 
@@ -53,6 +62,26 @@ abstract class AbstractBuildStep(private val connectionName: String) : Builder()
         open class DefaultBuildDescriptor(private val descriptorDisplayName: String = ""): BuildStepDescriptor<Builder?>() {
             override fun getDisplayName() = descriptorDisplayName
             override fun isApplicable(jobType: Class<out AbstractProject<*, *>>?) = true
+
+            fun doFillConnectionNameItems(): ListBoxModel {
+                val result = ListBoxModel()
+
+                GlobalConfiguration.all().get(ZOSConnectionList::class.java)?.connections?.forEach {
+                    result.add("${it.name} - (${it.url})", it.name)
+                }
+
+                return result
+            }
+
+            @Throws(IOException::class, ServletException::class)
+            open fun doCheckConnectionName(@QueryParameter connectionName: String): FormValidation? {
+                val result = ListBoxModel()
+                GlobalConfiguration.all().get(ZOSConnectionList::class.java)?.connections?.forEach {
+                    result.add("${it.name} - (${it.url})", it.name)
+                }
+                return if (result.isNotEmpty()) FormValidation.ok() else FormValidation.error(Messages.zdevops_config_ZOSConnectionList_validation_error())
+            }
+
         }
     }
 }

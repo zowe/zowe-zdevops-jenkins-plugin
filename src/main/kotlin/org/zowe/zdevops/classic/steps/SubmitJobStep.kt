@@ -13,14 +13,11 @@ package org.zowe.zdevops.classic.steps
 import org.zowe.kotlinsdk.zowe.client.sdk.zosjobs.SubmitJobs
 import org.zowe.zdevops.Messages
 import org.zowe.zdevops.classic.AbstractBuildStep
-import org.zowe.zdevops.config.ZOSConnectionList
 import hudson.AbortException
 import hudson.Extension
 import hudson.Launcher
 import hudson.model.AbstractBuild
 import hudson.model.BuildListener
-import hudson.util.ListBoxModel
-import jenkins.model.GlobalConfiguration
 import org.kohsuke.stapler.DataBoundConstructor
 import java.io.PrintWriter
 import java.io.StringWriter
@@ -58,14 +55,5 @@ constructor(
 
   @Extension
   class DescriptorImpl : Companion.DefaultBuildDescriptor(Messages.zdevops_classic_submitJobStep_display_name()) {
-    fun doFillConnectionNameItems(): ListBoxModel {
-      val result = ListBoxModel()
-
-      GlobalConfiguration.all().get(ZOSConnectionList::class.java)?.connections?.forEach {
-        result.add("${it.name} - (${it.url})", it.name)
-      }
-
-      return result
-    }
   }
 }
