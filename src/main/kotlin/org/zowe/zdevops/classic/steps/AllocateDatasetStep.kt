@@ -292,6 +292,13 @@ constructor(
      * @return The validation result
      */
     fun doCheckPrimary(@QueryParameter primary: String): FormValidation? {
+      if (primary.isEmpty()) return FormValidation.ok()
+      try {
+        val valueInt = primary.toInt()
+        if (valueInt == 0) return FormValidation.error("input 0 for primary allocation")
+      } catch (e: NumberFormatException) {
+        return FormValidation.error("Please enter a valid number in the field")
+      }
       return convertStringAndValidateIntPositive(primary)
     }
 
@@ -316,9 +323,9 @@ constructor(
       return try {
         val valueInt = value.toInt()
         return if (valueInt >= 0) FormValidation.ok()
-        else FormValidation.error("Must be positive")
+        else FormValidation.error("The field must be a positive number")
       } catch (e: NumberFormatException) {
-        FormValidation.error("Not a number")
+        FormValidation.error("Please enter a valid number in the field")
       }
     }
 
