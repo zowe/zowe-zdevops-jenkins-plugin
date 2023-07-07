@@ -42,7 +42,6 @@ class WriteOperation {
                 listener.logger.println(Messages.zdevops_declarative_writing_skip())
                 return
             }
-            listener.logger.println(Messages.zdevops_declarative_writing_DS_from_input(dsn, zosConnection.host, zosConnection.zosmfPort))
 
             val stringList = text.split('\n')
             val targetDS = ZosDsn(zosConnection).getDatasetInfo(dsn)

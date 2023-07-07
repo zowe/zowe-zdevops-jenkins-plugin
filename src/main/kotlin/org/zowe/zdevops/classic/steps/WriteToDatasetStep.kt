@@ -56,6 +56,7 @@ constructor(
         listener: BuildListener,
         zosConnection: ZOSConnection
     ) {
+        listener.logger.println(Messages.zdevops_declarative_writing_DS_from_input(dsn, zosConnection.host, zosConnection.zosmfPort))
         writeToDataset(listener, zosConnection, dsn, text)
     }
 
