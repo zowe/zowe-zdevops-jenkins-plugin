@@ -27,7 +27,15 @@ fun validateDatasetName(dsn: String): FormValidation? {
 }
 
 fun validateMemberName(member: String): FormValidation? {
-    return if (member.length > 8) FormValidation.error("Member name can not exceed 8 characters") else null
+    val memberPattern = Regex("^(?:[A-Z#@\$][A-Z0-9#@\$]{0,7}|[a-z#@\$][a-zA-Z0-9#@\$]{0,7})\$")
+
+    return if (member.length > 8 || member.isEmpty()) {
+        FormValidation.error("The field must be between 1 and 8 characters in length")
+    } else if(!member.matches(memberPattern)) {
+        FormValidation.warning("It seems the member name is invalid")
+    } else {
+        FormValidation.ok()
+    }
 }
 
 fun validateFieldIsNotEmpty(value: String): FormValidation? {
