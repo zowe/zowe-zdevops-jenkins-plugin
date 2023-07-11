@@ -83,7 +83,7 @@ constructor(
     ) {
         val workspace = build.executor?.currentWorkspace
         val file = when (fileOption) {
-            DescriptorImpl().localFileOption -> File(localFilePath)
+            DescriptorImpl().localFileOption -> File(localFilePath!!)
             DescriptorImpl().workspaceFileOption ->  {
                 val fileWorkspacePath = workspace?.remote?.replace(workspace.name, "") + workspacePath
                 File(fileWorkspacePath)
