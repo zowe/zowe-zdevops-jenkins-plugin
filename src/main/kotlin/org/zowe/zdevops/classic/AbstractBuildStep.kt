@@ -30,14 +30,31 @@ import java.io.StringWriter
 import java.net.URL
 import javax.servlet.ServletException
 
-
+/**
+ * The AbstractBuildStep class is an abstract class that serves as the base for the plugin build steps in Jenkins.
+ */
 abstract class AbstractBuildStep(private val connectionName: String) : Builder(), SimpleBuildStep {
-
+    /**
+     * Performs the build step.
+     *
+     * @param build          The build object.
+     * @param launcher       The launcher object.
+     * @param listener       The build listener.
+     * @param zosConnection  The connection to the z/OS system.
+     */
     abstract fun perform(build: AbstractBuild<*, *>,
                          launcher: Launcher,
                          listener: BuildListener,
                          zosConnection: ZOSConnection)
-
+    /**
+     * Performs the build step.
+     *
+     * @param build          The build object.
+     * @param launcher       The launcher object.
+     * @param listener       The build listener.
+     * @return True if the build step is successful, false otherwise.
+     * @throws IllegalArgumentException if the z/OS connection cannot be resolved.
+     */
     override fun perform(build: AbstractBuild<*, *>,
                          launcher: Launcher,
                          listener: BuildListener): Boolean {
@@ -59,10 +76,31 @@ abstract class AbstractBuildStep(private val connectionName: String) : Builder()
     }
 
     companion object {
+        /**
+         * The default descriptor for the plugin build steps.
+         *
+         * @param descriptorDisplayName The display name for the plugin build step
+         */
         open class DefaultBuildDescriptor(private val descriptorDisplayName: String = ""): BuildStepDescriptor<Builder?>() {
+            /**
+             * Gets the display name for the build step.
+             *
+             * @return The display name.
+             */
             override fun getDisplayName() = descriptorDisplayName
+            /**
+             * Checks if the build step is applicable to the specified job type
+             *
+             * @param jobType The type of the job.
+             * @return True if the build step is applicable, false otherwise.
+             */
             override fun isApplicable(jobType: Class<out AbstractProject<*, *>>?) = true
 
+            /**
+             * Fills the connection name items for the build step configuration.
+             *
+             * @return The ListBoxModel containing the connection name items.
+             */
             fun doFillConnectionNameItems(): ListBoxModel {
                 val result = ListBoxModel()
 
@@ -73,6 +111,12 @@ abstract class AbstractBuildStep(private val connectionName: String) : Builder()
                 return result
             }
 
+            /**
+             * Checks if the connection name is valid.
+             *
+             * @param connectionName The name of the z/OS connection.
+             * @return FormValidation.ok() if the connection name is valid, or an error message otherwise.
+             */
             @Throws(IOException::class, ServletException::class)
             open fun doCheckConnectionName(@QueryParameter connectionName: String): FormValidation? {
                 val result = ListBoxModel()
