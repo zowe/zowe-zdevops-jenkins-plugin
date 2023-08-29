@@ -21,8 +21,8 @@ import org.kohsuke.stapler.QueryParameter
 import org.zowe.kotlinsdk.zowe.client.sdk.core.ZOSConnection
 import org.zowe.zdevops.Messages
 import org.zowe.zdevops.classic.AbstractBuildStep
-import org.zowe.zdevops.logic.DownloadOperation.Companion.downloadDSOrDSMemberByType
-import org.zowe.zdevops.utils.validateDatasetName
+import org.zowe.zdevops.logic.downloadDSOrDSMemberByType
+import org.zowe.zdevops.utils.validateDsnOrDsnMemberName
 
 /**
  * The DownloadDatasetStep class is a build step that downloads a dataset or dataset members from a z/OS system.
@@ -32,7 +32,7 @@ class DownloadDatasetStep
  * Constructs a new instance of the DownloadDatasetStep.
  *
  * @param connectionName The name of the z/OS connection to use for downloading the dataset.
- * @param dsn            The name of the dataset to download.
+ * @param dsn            The name of the dataset or the dataset member to download.
  */
 @DataBoundConstructor
 constructor(
@@ -86,7 +86,7 @@ constructor(
          * @return FormValidation.ok() if the dataset name is valid, or an error message otherwise
          */
         fun doCheckDsn(@QueryParameter dsn: String): FormValidation? {
-            return validateDatasetName(dsn)
+            return validateDsnOrDsnMemberName(dsn)
         }
 
         /**
@@ -96,7 +96,7 @@ constructor(
          * @return FormValidation.ok() if the volume name is valid, or a warning message if it seems invalid.
          */
         fun doCheckVol(@QueryParameter vol: String): FormValidation? {
-            return if (vol.length > 7) FormValidation.warning("It seems the volume name is invalid")
+            return if (vol.length > 7) FormValidation.warning(Messages.zdevops_volume_name_is_invalid_validation())
             else FormValidation.ok()
         }
 

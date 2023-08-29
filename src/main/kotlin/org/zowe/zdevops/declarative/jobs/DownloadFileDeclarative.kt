@@ -10,15 +10,15 @@
 
 package org.zowe.zdevops.declarative.jobs
 
-import org.zowe.kotlinsdk.zowe.client.sdk.core.ZOSConnection
-import org.zowe.zdevops.declarative.AbstractZosmfAction
 import hudson.*
 import hudson.model.Run
 import hudson.model.TaskListener
 import org.jenkinsci.Symbol
 import org.kohsuke.stapler.DataBoundConstructor
 import org.kohsuke.stapler.DataBoundSetter
-import org.zowe.zdevops.logic.DownloadOperation.Companion.downloadDSOrDSMemberByType
+import org.zowe.kotlinsdk.zowe.client.sdk.core.ZOSConnection
+import org.zowe.zdevops.declarative.AbstractZosmfAction
+import org.zowe.zdevops.logic.downloadDSOrDSMemberByType
 
 class DownloadFileDeclarative @DataBoundConstructor constructor(val dsn: String) :
     AbstractZosmfAction() {

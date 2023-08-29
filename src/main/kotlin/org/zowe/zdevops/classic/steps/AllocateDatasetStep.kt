@@ -267,11 +267,11 @@ constructor(
           val lreclInt = Integer.parseInt(lrecl)
           val blkSizeInt = Integer.parseInt(blkSize)
 
-          if (lreclInt > blkSizeInt) return FormValidation.warning("BLKSIZE can't be smaller than LRECL")
+          if (lreclInt > blkSizeInt) return FormValidation.warning(Messages.zdevops_classic_allocateDatasetStep_blksize_smaller_than_lrecl_validation())
           return if (blkSizeInt % lreclInt == 0) FormValidation.ok()
           else FormValidation.warning(Messages.zdevops_classic_allocateDatasetStep_blksize_validation_warning())
       } catch (e: NumberFormatException) {
-        return FormValidation.warning("Not a number")
+        return FormValidation.warning(Messages.zdevops_value_is_not_number_validation())
       }
     }
 
@@ -295,9 +295,9 @@ constructor(
       if (primary.isEmpty()) return FormValidation.ok()
       try {
         val valueInt = primary.toInt()
-        if (valueInt == 0) return FormValidation.error("input 0 for primary allocation")
+        if (valueInt == 0) return FormValidation.error(Messages.zdevops_classic_allocateDatasetStep_primary_is_zero_validation())
       } catch (e: NumberFormatException) {
-        return FormValidation.error("Please enter a valid number in the field")
+        return FormValidation.error(Messages.zdevops_value_is_not_number_validation())
       }
       return convertStringAndValidateIntPositive(primary)
     }
@@ -323,9 +323,9 @@ constructor(
       return try {
         val valueInt = value.toInt()
         return if (valueInt >= 0) FormValidation.ok()
-        else FormValidation.error("The field must be a positive number")
+        else FormValidation.error(Messages.zdevops_value_must_be_positive_number_validation())
       } catch (e: NumberFormatException) {
-        FormValidation.error("Please enter a valid number in the field")
+        FormValidation.error(Messages.zdevops_value_is_not_number_validation())
       }
     }
 

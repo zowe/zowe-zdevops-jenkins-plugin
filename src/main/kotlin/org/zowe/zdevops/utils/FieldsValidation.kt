@@ -11,18 +11,19 @@
 package org.zowe.zdevops.utils
 
 import hudson.util.FormValidation
+import org.zowe.zdevops.Messages
 
 fun validateDatasetName(dsn: String): FormValidation? {
     val dsnPattern = Regex("^[a-zA-Z#\$@][a-zA-Z0-9#\$@-]{0,7}([.][a-zA-Z#\$@][a-zA-Z0-9#\$@-]{0,7}){0,21}$")
 
     return if (dsn.isNotBlank()) {
         if (!dsn.matches(dsnPattern)) {
-            FormValidation.warning("It seems the dataset name is invalid")
+            FormValidation.warning(Messages.zdevops_dataset_name_is_invalid_validation())
         } else {
             FormValidation.ok()
         }
     } else {
-        FormValidation.error("Field must not be empty")
+        FormValidation.error(Messages.zdevops_value_must_not_be_empty_validation())
     }
 }
 
@@ -30,17 +31,31 @@ fun validateMemberName(member: String): FormValidation? {
     val memberPattern = Regex("^(?:[A-Z#@\$][A-Z0-9#@\$]{0,7}|[a-z#@\$][a-zA-Z0-9#@\$]{0,7})\$")
 
     return if (member.length > 8 || member.isEmpty()) {
-        FormValidation.error("The field must be between 1 and 8 characters in length")
+        FormValidation.error(Messages.zdevops_value_up_to_eight_in_length_validation())
     } else if(!member.matches(memberPattern)) {
-        FormValidation.warning("It seems the member name is invalid")
+        FormValidation.warning(Messages.zdevops_member_name_is_invalid_validation())
     } else {
         FormValidation.ok()
     }
 }
 
+fun validateDsnOrDsnMemberName(dsnOrDsnMember: String) : FormValidation? {
+    val dsnOrDsnMemberPattern = Regex("^[a-zA-Z#\$@][a-zA-Z0-9#\$@-]{0,7}([.][a-zA-Z#\$@][a-zA-Z0-9#\$@-]{0,7}){0,21}(?:[(](?:[A-Z#@\$][A-Z0-9#@\$]{0,7}|[a-z#@\$][a-zA-Z0-9#@\$]{0,7})[)]\$|)\$")
+
+    return if (dsnOrDsnMember.isNotBlank()) {
+        if (!dsnOrDsnMember.matches(dsnOrDsnMemberPattern)) {
+            FormValidation.warning(Messages.zdevops_dataset_name_is_invalid_validation())
+        } else {
+            FormValidation.ok()
+        }
+    } else {
+        FormValidation.error(Messages.zdevops_value_must_not_be_empty_validation())
+    }
+}
+
 fun validateFieldIsNotEmpty(value: String): FormValidation? {
     return if (value == "") {
-        FormValidation.error("Field must not be empty")
+        FormValidation.error(Messages.zdevops_value_must_not_be_empty_validation())
     } else {
         FormValidation.ok()
     }
