@@ -13,7 +13,6 @@ package org.zowe.zdevops.utils
 import com.google.gson.Gson
 import com.google.gson.reflect.TypeToken
 import hudson.model.TaskListener
-import java.lang.NullPointerException
 
 // TODO: doc
 inline fun <R> runMFTryCatchWrappedQuery(listener: TaskListener, call: () -> R): Result<R> {
@@ -40,4 +39,11 @@ inline fun <R> runMFTryCatchWrappedQuery(listener: TaskListener, call: () -> R):
         }
         throw Exception(e)
     }
+}
+
+
+fun extractSubmitJobMessage(httpJson: String) : String? {
+    val regex = Regex("message=(.*?)(\\\\n|\\z)")
+    val matchResult = regex.find(httpJson)
+    return matchResult?.groups?.get(1)?.value
 }

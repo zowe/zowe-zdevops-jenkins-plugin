@@ -10,18 +10,14 @@
 
 package org.zowe.zdevops.declarative.jobs
 
-import org.zowe.kotlinsdk.zowe.client.sdk.core.ZOSConnection
-import org.zowe.kotlinsdk.zowe.client.sdk.zosjobs.GetJobs
-import org.zowe.kotlinsdk.zowe.client.sdk.zosjobs.MonitorJobs
-import org.zowe.kotlinsdk.zowe.client.sdk.zosjobs.SubmitJobs
-import org.zowe.zdevops.declarative.AbstractZosmfAction
 import hudson.*
-import hudson.console.HyperlinkNote
 import hudson.model.Run
 import hudson.model.TaskListener
 import org.jenkinsci.Symbol
 import org.kohsuke.stapler.DataBoundConstructor
-import java.io.File
+import org.zowe.kotlinsdk.zowe.client.sdk.core.ZOSConnection
+import org.zowe.zdevops.declarative.AbstractZosmfAction
+import org.zowe.zdevops.logic.submitJobSync
 
 class SubmitJobSyncStepDeclarative @DataBoundConstructor constructor(private val fileToSubmit: String):
   AbstractZosmfAction() {
@@ -36,32 +32,11 @@ class SubmitJobSyncStepDeclarative @DataBoundConstructor constructor(private val
     listener: TaskListener,
     zosConnection: ZOSConnection
   ) {
-      listener.logger.println(zMessages.zdevops_declarative_ZOSJobs_submitting(fileToSubmit, zosConnection.host, zosConnection.zosmfPort))
-      val submitJobRsp = SubmitJobs(zosConnection).submitJob(fileToSubmit)
-      listener.logger.println(zMessages.zdevops_declarative_ZOSJobs_submitted_success(submitJobRsp.jobid, submitJobRsp.jobname, submitJobRsp.owner))
-      listener.logger.println(zMessages.zdevops_declarative_ZOSJobs_submitted_waiting())
-      val jobId = submitJobRsp.jobid ?: throw IllegalStateException("System response doesn't contain JOB ID.")
-      val jobName = submitJobRsp.jobname ?: throw IllegalStateException("System response doesn't contain JOB name.")
-      val finalResult = MonitorJobs(zosConnection).waitForJobOutputStatus(jobName, jobId)
-      listener.logger.println(zMessages.zdevops_declarative_ZOSJobs_submitted_executed(finalResult.returnedCode))
-
-      listener.logger.println(zMessages.zdevops_declarative_ZOSJobs_getting_log())
-      val spoolFiles = GetJobs(zosConnection).getSpoolFilesForJob(finalResult)
-      if (spoolFiles.isNotEmpty()) {
-        val fullLog = spoolFiles.joinToString { GetJobs(zosConnection).getSpoolContent(it) }
-        val workspacePath = workspace.remote.replace(workspace.name, "")
-        val logPath = "$workspacePath${finalResult.jobName}.${finalResult.jobId}"
-        val file = File(logPath)
-        file.writeText(fullLog)
-        listener.logger.println(zMessages.zdevops_declarative_ZOSJobs_got_log(
-                HyperlinkNote.encodeTo(
-                    "${env["BUILD_URL"]}execution/node/3/ws/${finalResult.jobName}.${finalResult.jobId}/*view*/",
-                    "${finalResult.jobName}.${finalResult.jobId}"
-                )
-        ))
-      } else {
-        listener.logger.println(zMessages.zdevops_no_spool_files(submitJobRsp.jobid))
+      val workspacePath = FilePath(null, workspace.remote.replace(workspace.name,""))
+      val linkBuilder: (String?, String, String) -> String = { buildUrl, jobName, jobId ->
+          "$buildUrl/execution/node/3/ws/${jobName}.${jobId}/*view*/"
       }
+      submitJobSync(fileToSubmit, zosConnection, listener, workspacePath, env["BUILD_URL"], linkBuilder)
   }
 
   @Symbol("submitJobSync")

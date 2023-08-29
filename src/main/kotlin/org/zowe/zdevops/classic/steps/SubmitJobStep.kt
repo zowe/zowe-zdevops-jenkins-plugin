@@ -10,23 +10,25 @@
 
 package org.zowe.zdevops.classic.steps
 
-import org.zowe.kotlinsdk.zowe.client.sdk.zosjobs.SubmitJobs
-import org.zowe.zdevops.Messages
-import org.zowe.zdevops.classic.AbstractBuildStep
 import hudson.AbortException
 import hudson.Extension
 import hudson.Launcher
 import hudson.model.AbstractBuild
 import hudson.model.BuildListener
 import org.kohsuke.stapler.DataBoundConstructor
-import java.io.PrintWriter
-import java.io.StringWriter
+import org.kohsuke.stapler.bind.JavaScriptMethod
+import org.zowe.zdevops.Messages
+import org.zowe.zdevops.classic.AbstractBuildStep
+import org.zowe.zdevops.logic.submitJob
+import org.zowe.zdevops.logic.submitJobSync
 
 class SubmitJobStep
 @DataBoundConstructor
 constructor(
   connectionName: String,
-  val jobName: String
+  val jobName: String,
+  val sync: Boolean,
+  val checkRC: Boolean,
 ) : AbstractBuildStep(connectionName) {
   override fun perform(
       build: AbstractBuild<*, *>,
@@ -34,26 +36,35 @@ constructor(
       listener: BuildListener,
       zosConnection: org.zowe.kotlinsdk.zowe.client.sdk.core.ZOSConnection
   ) {
-    runCatching {
-      listener.logger.println(Messages.zdevops_classic_ZOSJobs_submitting(jobName, zosConnection.host, zosConnection.zosmfPort))
-      val submitJobRsp = SubmitJobs(zosConnection).submitJob(jobName)
-      listener.logger.println(
-          Messages.zdevops_classic_ZOSJobs_submitted_success(
-              submitJobRsp.jobid,
-              submitJobRsp.jobname,
-              submitJobRsp.owner
-          )
-      )
-    }.onFailure {
-      val sw = StringWriter()
-      it.printStackTrace(PrintWriter(sw))
-      listener.logger.println(sw.toString())
-      throw AbortException(Messages.zdevops_classic_ZOSJobs_submitted_fail(jobName))
+    if (sync) {
+      val workspace = build.executor?.currentWorkspace!!
+      val linkBuilder: (String?, String, String) -> String = { jobUrl, jobName, jobId ->
+        "${jobUrl}ws/${jobName}.${jobId}/*view*/"
+      }
+      val returnCode = submitJobSync(jobName, zosConnection, listener, workspace, build.getEnvironment(listener)["JOB_URL"], linkBuilder)
+      if (checkRC && !returnCode.equals("CC 0000")) {
+        throw AbortException("Job RC code is not 0000")
+      }
+    } else {
+      submitJob(jobName, zosConnection, listener)
     }
   }
 
 
   @Extension
   class DescriptorImpl : Companion.DefaultBuildDescriptor(Messages.zdevops_classic_submitJobStep_display_name()) {
+    private var lastStepId = 0
+    private val marker: String = "SJ"
+
+    /**
+     * Creates a unique step ID
+     *
+     * @return The generated step ID
+     */
+    @JavaScriptMethod
+    @Synchronized
+    fun createStepId(): String {
+      return marker + lastStepId++.toString()
+    }
   }
 }
