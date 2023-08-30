@@ -13,6 +13,12 @@ package org.zowe.zdevops.utils
 import hudson.util.FormValidation
 import org.zowe.zdevops.Messages
 
+/**
+ * Validates a dataset name according to specific rules.
+ *
+ * @param dsn The dataset name to validate.
+ * @return A [FormValidation] result indicating the validation status.
+ */
 fun validateDatasetName(dsn: String): FormValidation? {
     val dsnPattern = Regex("^[a-zA-Z#\$@][a-zA-Z0-9#\$@-]{0,7}([.][a-zA-Z#\$@][a-zA-Z0-9#\$@-]{0,7}){0,21}$")
 
@@ -27,6 +33,12 @@ fun validateDatasetName(dsn: String): FormValidation? {
     }
 }
 
+/**
+ * Validates a member name according to specific rules.
+ *
+ * @param member The member name to validate.
+ * @return A [FormValidation] result indicating the validation status.
+ */
 fun validateMemberName(member: String): FormValidation? {
     val memberPattern = Regex("^(?:[A-Z#@\$][A-Z0-9#@\$]{0,7}|[a-z#@\$][a-zA-Z0-9#@\$]{0,7})\$")
 
@@ -39,6 +51,12 @@ fun validateMemberName(member: String): FormValidation? {
     }
 }
 
+/**
+ * Validates a dataset name or dataset member name according to specific rules.
+ *
+ * @param dsnOrDsnMember The dataset name or dataset member name to validate.
+ * @return A [FormValidation] result indicating the validation status.
+ */
 fun validateDsnOrDsnMemberName(dsnOrDsnMember: String) : FormValidation? {
     val dsnOrDsnMemberPattern = Regex("^[a-zA-Z#\$@][a-zA-Z0-9#\$@-]{0,7}([.][a-zA-Z#\$@][a-zA-Z0-9#\$@-]{0,7}){0,21}(?:[(](?:[A-Z#@\$][A-Z0-9#@\$]{0,7}|[a-z#@\$][a-zA-Z0-9#@\$]{0,7})[)]\$|)\$")
 
@@ -53,6 +71,12 @@ fun validateDsnOrDsnMemberName(dsnOrDsnMember: String) : FormValidation? {
     }
 }
 
+/**
+ * Validates that a field value is not empty.
+ *
+ * @param value The field value to validate.
+ * @return A [FormValidation] result indicating the validation status.
+ */
 fun validateFieldIsNotEmpty(value: String): FormValidation? {
     return if (value == "") {
         FormValidation.error(Messages.zdevops_value_must_not_be_empty_validation())

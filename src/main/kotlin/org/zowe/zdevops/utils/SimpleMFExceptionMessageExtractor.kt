@@ -14,7 +14,13 @@ import com.google.gson.Gson
 import com.google.gson.reflect.TypeToken
 import hudson.model.TaskListener
 
-// TODO: doc
+/**
+ * A utility function for executing a try-catch block around a specified z/OSMF call and handling exceptions (e.g. getting log message).
+ *
+ * @param listener The task listener to log information and handle exceptions.
+ * @param call The lambda function to be executed.
+ * @return A [Result] containing the result of the call if successful, or an error message if an exception occurs.
+ */
 inline fun <R> runMFTryCatchWrappedQuery(listener: TaskListener, call: () -> R): Result<R> {
     try {
         return Result.success(call())
@@ -41,7 +47,12 @@ inline fun <R> runMFTryCatchWrappedQuery(listener: TaskListener, call: () -> R):
     }
 }
 
-
+/**
+ * Extracts a submit job message from HTTP JSON response.
+ *
+ * @param httpJson The HTTP JSON response containing the message.
+ * @return The extracted submit job message.
+ */
 fun extractSubmitJobMessage(httpJson: String) : String? {
     val regex = Regex("message=(.*?)(\\\\n|\\z)")
     val matchResult = regex.find(httpJson)

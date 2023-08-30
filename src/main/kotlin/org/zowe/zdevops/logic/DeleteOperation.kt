@@ -21,6 +21,14 @@ import org.zowe.zdevops.utils.runMFTryCatchWrappedQuery
 
 private val successMessage: String = zMessages.zdevops_deleting_ds_success()
 
+/**
+ * Deletes datasets matching the provided mask
+ *
+ * @param mask The mask used to filter datasets.
+ * @param zosConnection The z/OS connection to be used for dataset deletion.
+ * @param listener The task listener to log information and handle exceptions.
+ * @throws AbortException If the mask is empty or no matching datasets are found.
+ */
 fun deleteDatasetsByMask(mask: String, zosConnection: ZOSConnection, listener: TaskListener) {
     if (mask.isEmpty()) {
         throw AbortException(zMessages.zdevops_deleting_datasets_by_mask_but_mask_is_empty())
@@ -39,6 +47,15 @@ fun deleteDatasetsByMask(mask: String, zosConnection: ZOSConnection, listener: T
     listener.logger.println(successMessage)
 }
 
+/**
+ * Deletes a dataset or member
+ *
+ * @param dsn The dataset name.
+ * @param member The member name (optional).
+ * @param zosConnection The z/OS connection to be used for dataset deletion.
+ * @param listener The task listener to log information and handle exceptions.
+ * @throws AbortException If the dataset name is empty or the member name is invalid.
+ */
 fun deleteDatasetOrMember(dsn: String, member: String?, zosConnection: ZOSConnection, listener: TaskListener) {
     if (dsn.isEmpty()) {
         throw AbortException(zMessages.zdevops_deleting_ds_fail_dsn_param_empty())
@@ -57,6 +74,12 @@ fun deleteDatasetOrMember(dsn: String, member: String?, zosConnection: ZOSConnec
     listener.logger.println(successMessage)
 }
 
+/**
+ * Validates a member name.
+ *
+ * @param member The member name to validate.
+ * @throws Exception If the member name is invalid.
+ */
 private fun isMemberNameValid(member: String) {
     if (member.length > 8 || member.isEmpty())
         throw Exception(zMessages.zdevops_member_name_invalid())
