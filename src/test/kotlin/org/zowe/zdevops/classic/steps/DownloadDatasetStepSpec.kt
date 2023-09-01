@@ -64,7 +64,7 @@ class DownloadDatasetStepSpec : ShouldSpec({
         val build = object:TestBuild(project) {
             override fun getExecutor(): Executor {
                 val mockInstance = mockk<Executor>()
-                val mockDir = Paths.get(rootDir, "src", "test", "resources", "mock").toString()
+                val mockDir = Paths.get(rootDir, "src", "test", "resources", "trash").toString()
                 every { mockInstance.currentWorkspace } returns FilePath(virtualChannel, mockDir)
                 return mockInstance
             }
