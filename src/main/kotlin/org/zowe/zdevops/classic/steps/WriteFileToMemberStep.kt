@@ -24,7 +24,7 @@ import org.kohsuke.stapler.bind.JavaScriptMethod
 import org.zowe.kotlinsdk.zowe.client.sdk.core.ZOSConnection
 import org.zowe.zdevops.Messages
 import org.zowe.zdevops.classic.AbstractBuildStep
-import org.zowe.zdevops.logic.WriteOperation.Companion.writeToMember
+import org.zowe.zdevops.logic.writeToMember
 import org.zowe.zdevops.utils.validateDatasetName
 import org.zowe.zdevops.utils.validateFieldIsNotEmpty
 import org.zowe.zdevops.utils.validateMemberName
@@ -86,16 +86,18 @@ constructor(
     ) {
         val workspace = build.executor?.currentWorkspace
         val file = when (fileOption) {
-            DescriptorImpl().localFileOption -> File(localFilePath)
+            DescriptorImpl().localFileOption -> localFilePath?.let { File(it) }
             DescriptorImpl().workspaceFileOption ->  {
                 val fileWorkspacePath = workspace?.remote?.replace(workspace.name, "") + workspacePath
                 File(fileWorkspacePath)
             }
             else        -> throw AbortException(Messages.zdevops_classic_write_options_invalid())
         }
-        listener.logger.println(Messages.zdevops_declarative_writing_DS_from_file(dsn, file.name, zosConnection.host, zosConnection.zosmfPort))
-        val fileContent = file.readText()
-        writeToMember(listener, zosConnection, dsn, member, fileContent)
+        listener.logger.println(Messages.zdevops_declarative_writing_DS_from_file(dsn, file?.name, zosConnection.host, zosConnection.zosmfPort))
+        val fileContent = file?.readText()
+        if (fileContent != null) {
+            writeToMember(listener, zosConnection, dsn, member, fileContent)
+        }
     }
 
     /**

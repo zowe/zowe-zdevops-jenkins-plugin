@@ -20,7 +20,7 @@ import org.kohsuke.stapler.QueryParameter
 import org.zowe.kotlinsdk.zowe.client.sdk.core.ZOSConnection
 import org.zowe.zdevops.Messages
 import org.zowe.zdevops.classic.AbstractBuildStep
-import org.zowe.zdevops.logic.WriteOperation.Companion.writeToDataset
+import org.zowe.zdevops.logic.writeToDataset
 import org.zowe.zdevops.utils.validateDatasetName
 import org.zowe.zdevops.utils.validateFieldIsNotEmpty
 

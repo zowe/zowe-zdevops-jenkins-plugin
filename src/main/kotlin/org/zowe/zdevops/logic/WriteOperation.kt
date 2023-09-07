@@ -17,93 +17,86 @@ import org.zowe.kotlinsdk.zowe.client.sdk.zosfiles.ZosDsn
 import org.zowe.zdevops.Messages
 import org.zowe.zdevops.utils.runMFTryCatchWrappedQuery
 
+
+
 /**
- * The class is for performing write operations on datasets, members and USS files
+ * Validates the text to be written to a dataset
+ *
+ * @param listener      The listener for logging messages
+ * @param zosConnection The ZOSConnection for interacting with z/OS
+ * @param dsn           The name of the dataset
+ * @param text          The text content to be written
+ * @throws AbortException if the text is empty or contains ineligible strings.
  */
-class WriteOperation {
-    companion object {
-
-        /**
-         * Validates the text to be written to a dataset
-         *
-         * @param listener      The listener for logging messages
-         * @param zosConnection The ZOSConnection for interacting with z/OS
-         * @param dsn           The name of the dataset
-         * @param text          The text content to be written
-         * @throws AbortException if the text is empty or contains ineligible strings.
-         */
-        private fun validateTextForDataset(
-            listener: TaskListener,
-            zosConnection: ZOSConnection,
-            dsn: String,
-            text: String,
-            ) {
-            if(text == "") {
-                listener.logger.println(Messages.zdevops_declarative_writing_skip())
-                return
-            }
-
-            val stringList = text.split('\n')
-            val targetDS = ZosDsn(zosConnection).getDatasetInfo(dsn)
-            if (targetDS.recordLength == null) {
-                throw AbortException(Messages.zdevops_declarative_writing_DS_no_info(dsn))
-            }
-            var ineligibleStrings = 0
-            stringList.forEach {
-                if (it.length > targetDS.recordLength!!) {
-                    ineligibleStrings++
-                }
-            }
-            if (ineligibleStrings > 0) {
-                throw AbortException(Messages.zdevops_declarative_writing_DS_ineligible_strings(ineligibleStrings,dsn))
-            }
-        }
-
-        /**
-         * Writes the text content to a dataset
-         *
-         * @param listener      The listener for logging messages
-         * @param zosConnection The ZOSConnection for interacting with z/OS
-         * @param dsn           The name of the dataset
-         * @param text          The text content to be written
-         * @throws AbortException if the text is not valid for the dataset or an error occurs during the write operation
-         */
-        fun writeToDataset(listener: TaskListener,
-                           zosConnection: ZOSConnection,
-                           dsn: String,
-                           text: String,
-                           ) {
-            validateTextForDataset(listener, zosConnection, dsn, text)
-            val textByteArray = text.replace("\r","").toByteArray()
-            runMFTryCatchWrappedQuery(listener) {
-                ZosDsn(zosConnection).writeDsn(dsn, textByteArray)
-            }
-            listener.logger.println(Messages.zdevops_declarative_writing_DS_success(dsn))
-        }
-
-
-        /**
-         * Writes the text content to a member
-         *
-         * @param listener      The listener for logging messages
-         * @param zosConnection The ZOSConnection for interacting with z/OS
-         * @param dsn           The name of the dataset
-         * @param member        The name of the member
-         * @param text          The text content to be written
-         * @throws AbortException if the text is not valid for the dataset or an error occurs during the write operation
-         */
-        fun writeToMember(listener: TaskListener,
-                          zosConnection: ZOSConnection,
-                          dsn: String,
-                          member: String,
-                          text: String,) {
-            validateTextForDataset(listener, zosConnection, dsn, text)
-            val textByteArray = text.replace("\r","").toByteArray()
-            runMFTryCatchWrappedQuery(listener) {
-                ZosDsn(zosConnection).writeDsn(dsn, member, textByteArray)
-            }
-            listener.logger.println(Messages.zdevops_declarative_writing_DS_success(dsn))
-        }
+private fun validateTextForDataset(
+    listener: TaskListener,
+    zosConnection: ZOSConnection,
+    dsn: String,
+    text: String,
+    ) {
+    if(text == "") {
+        listener.logger.println(Messages.zdevops_declarative_writing_skip())
+        return
     }
 
+    val stringList = text.split('\n')
+    val targetDS = ZosDsn(zosConnection).getDatasetInfo(dsn)
+    if (targetDS.recordLength == null) {
+        throw AbortException(Messages.zdevops_declarative_writing_DS_no_info(dsn))
+    }
+    var ineligibleStrings = 0
+    stringList.forEach {
+        if (it.length > targetDS.recordLength!!) {
+            ineligibleStrings++
+        }
+    }
+    if (ineligibleStrings > 0) {
+        throw AbortException(Messages.zdevops_declarative_writing_DS_ineligible_strings(ineligibleStrings,dsn))
+    }
+}
+
+/**
+ * Writes the text content to a dataset
+ *
+ * @param listener      The listener for logging messages
+ * @param zosConnection The ZOSConnection for interacting with z/OS
+ * @param dsn           The name of the dataset
+ * @param text          The text content to be written
+ * @throws AbortException if the text is not valid for the dataset or an error occurs during the write operation
+ */
+fun writeToDataset(listener: TaskListener,
+                   zosConnection: ZOSConnection,
+                   dsn: String,
+                   text: String,
+                   ) {
+    validateTextForDataset(listener, zosConnection, dsn, text)
+    val textByteArray = text.replace("\r","").toByteArray()
+    runMFTryCatchWrappedQuery(listener) {
+        ZosDsn(zosConnection).writeDsn(dsn, textByteArray)
+    }
+    listener.logger.println(Messages.zdevops_declarative_writing_DS_success(dsn))
+}
+
+
+/**
+ * Writes the text content to a member
+ *
+ * @param listener      The listener for logging messages
+ * @param zosConnection The ZOSConnection for interacting with z/OS
+ * @param dsn           The name of the dataset
+ * @param member        The name of the member
+ * @param text          The text content to be written
+ * @throws AbortException if the text is not valid for the dataset or an error occurs during the write operation
+ */
+fun writeToMember(listener: TaskListener,
+                  zosConnection: ZOSConnection,
+                  dsn: String,
+                  member: String,
+                  text: String,) {
+    validateTextForDataset(listener, zosConnection, dsn, text)
+    val textByteArray = text.replace("\r","").toByteArray()
+    runMFTryCatchWrappedQuery(listener) {
+        ZosDsn(zosConnection).writeDsn(dsn, member, textByteArray)
+    }
+    listener.logger.println(Messages.zdevops_declarative_writing_DS_success(dsn))
 }

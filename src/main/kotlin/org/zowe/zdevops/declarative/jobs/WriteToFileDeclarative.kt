@@ -10,16 +10,15 @@
 
 package org.zowe.zdevops.declarative.jobs
 
-import org.zowe.kotlinsdk.zowe.client.sdk.core.ZOSConnection
-import org.zowe.kotlinsdk.zowe.client.sdk.zosuss.ZosUssFile
-import org.zowe.zdevops.declarative.AbstractZosmfAction
 import hudson.*
-import hudson.FilePath
 import hudson.model.Run
 import hudson.model.TaskListener
 import org.jenkinsci.Symbol
 import org.kohsuke.stapler.DataBoundConstructor
 import org.kohsuke.stapler.DataBoundSetter
+import org.zowe.kotlinsdk.zowe.client.sdk.core.ZOSConnection
+import org.zowe.kotlinsdk.zowe.client.sdk.zosuss.ZosUssFile
+import org.zowe.zdevops.declarative.AbstractZosmfAction
 
 class WriteToFileDeclarative @DataBoundConstructor constructor(private val destFile: String,
                                                                private val text: String) :
@@ -40,8 +39,8 @@ class WriteToFileDeclarative @DataBoundConstructor constructor(private val destF
         listener: TaskListener,
         zosConnection: ZOSConnection
     ) {
+        listener.logger.println(zMessages.zdevops_declarative_writing_file_from_input(destFile, zosConnection.host, zosConnection.zosmfPort))
         if (text != "") {
-            listener.logger.println(zMessages.zdevops_declarative_writing_file_from_input(destFile, zosConnection.host, zosConnection.zosmfPort))
             if (binary == true) {
                 ZosUssFile(zosConnection).writeToFileBin(destFile, text.toByteArray())
             } else {
