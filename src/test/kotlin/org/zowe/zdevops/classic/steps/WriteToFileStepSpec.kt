@@ -10,8 +10,6 @@
 
 package org.zowe.zdevops.classic.steps
 
-import hudson.FilePath
-import hudson.model.Executor
 import hudson.model.Item
 import io.kotest.assertions.assertSoftly
 import io.kotest.assertions.fail
@@ -26,11 +24,15 @@ import org.zowe.kotlinsdk.zowe.client.sdk.core.ZOSConnection
 import org.zowe.zdevops.MOCK_SERVER_HOST
 import org.zowe.zdevops.MockResponseDispatcher
 import org.zowe.zdevops.MockServerFactory
+import org.zowe.zdevops.declarative.jobs.TestBuildListener
+import org.zowe.zdevops.declarative.jobs.TestItemGroup
+import org.zowe.zdevops.declarative.jobs.TestLauncher
+import org.zowe.zdevops.declarative.jobs.TestVirtualChannel
 import java.io.File
 import java.io.PrintStream
 import java.nio.file.Paths
 
-class WriteFileToDatasetStepSpec : ShouldSpec({
+class WriteToFileStepSpec : ShouldSpec({
     lateinit var mockServer: MockWebServer
     lateinit var responseDispatcher: MockResponseDispatcher
     val mockServerFactory = MockServerFactory()
@@ -42,7 +44,7 @@ class WriteFileToDatasetStepSpec : ShouldSpec({
     afterSpec {
         mockServerFactory.stopMockServer()
     }
-    context("classic/steps module: WriteFileToDatasetStep") {
+    context("classic/steps module: WriteToFileStep") {
         val virtualChannel = TestVirtualChannel()
         val zosConnection = ZOSConnection(mockServer.hostName, mockServer.port.toString(), "test", "test", "https")
         val rootDir = Paths.get("").toAbsolutePath().toString()
@@ -53,20 +55,13 @@ class WriteFileToDatasetStepSpec : ShouldSpec({
             }
         }
         val project = TestProject(itemGroup, "test")
-        val build = object:TestBuild(project) {
-            override fun getExecutor(): Executor {
-                val mockInstance = mockk<Executor>()
-                val mockDir = Paths.get(rootDir, "src", "test", "resources", "mock").toString()
-                every { mockInstance.currentWorkspace } returns FilePath(virtualChannel, mockDir)
-                return mockInstance
-            }
-        }
+        val build = TestBuild(project)
 
         afterEach {
             responseDispatcher.removeAllEndpoints()
         }
-        should("perform WriteFileToDatasetStep operation to write a file to a dataset") {
-            var isWritingToDataset = false
+        should("perform WriteToFileStep operation to write text to a USS file") {
+            var isWritingToFile = false
             var isWritten = false
             val taskListener = object : TestBuildListener() {
                 override fun getLogger(): PrintStream {
@@ -74,9 +69,9 @@ class WriteFileToDatasetStepSpec : ShouldSpec({
                     every {
                         logger.println(any<String>())
                     } answers {
-                        if (firstArg<String>().contains("Writing to dataset")) {
-                            isWritingToDataset = true
-                        } else if (firstArg<String>().contains("Data has been written to dataset")) {
+                        if (firstArg<String>().contains("Writing to Unix file")) {
+                            isWritingToFile = true
+                        } else if (firstArg<String>().contains("Data has been written to Unix file")) {
                             isWritten = true
                         } else {
                             fail("Unexpected logger message: ${firstArg<String>()}")
@@ -85,24 +80,24 @@ class WriteFileToDatasetStepSpec : ShouldSpec({
                     return logger
                 }
             }
+            val filePath = "/u/TEST/test.txt"
             val launcher = TestLauncher(taskListener, virtualChannel)
             responseDispatcher.injectEndpoint(
-                "${this.testCase.name.testName}_listDataSets",
-                { it?.requestLine?.contains("zosmf/restfiles/ds") ?: false },
-                { MockResponse().setBody(responseDispatcher.readMockJson("listDataSets") ?: "") }
+                "${this.testCase.name.testName}_UssFile",
+                { it?.requestLine?.contains("zosmf/restfiles/fs${filePath}") ?: false },
+                { MockResponse().setBody("") }
             )
 
-            val writeFileToDatasetDecl = spyk(
-                WriteFileToDatasetStep("test", "TEST.IJMP.DATASET1", "workspace")
+            val writeTextToFileDecl = spyk(
+                WriteToFileStep("test", filePath, "TEXT TO WRITE")
             )
-            writeFileToDatasetDecl.setWorkspacePath("test_file.txt")
-            writeFileToDatasetDecl.perform(
+            writeTextToFileDecl.perform(
                 build,
                 launcher,
                 taskListener,
                 zosConnection
             )
-            assertSoftly { isWritingToDataset shouldBe true }
+            assertSoftly { isWritingToFile shouldBe true }
             assertSoftly { isWritten shouldBe true }
         }
     }

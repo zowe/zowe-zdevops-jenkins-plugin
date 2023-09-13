@@ -14,6 +14,7 @@ import hudson.AbortException
 import hudson.model.TaskListener
 import org.zowe.kotlinsdk.zowe.client.sdk.core.ZOSConnection
 import org.zowe.kotlinsdk.zowe.client.sdk.zosfiles.ZosDsn
+import org.zowe.kotlinsdk.zowe.client.sdk.zosuss.ZosUssFile
 import org.zowe.zdevops.Messages
 import org.zowe.zdevops.utils.runMFTryCatchWrappedQuery
 
@@ -99,4 +100,24 @@ fun writeToMember(listener: TaskListener,
         ZosDsn(zosConnection).writeDsn(dsn, member, textByteArray)
     }
     listener.logger.println(Messages.zdevops_declarative_writing_DS_success(dsn))
+}
+
+//TODO: docs
+fun writeToFile(listener: TaskListener,
+                zosConnection: ZOSConnection,
+                destFile: String,
+                textBytes: ByteArray,
+                binary: Boolean?,) {
+    if (textBytes.isNotEmpty()) {
+        runMFTryCatchWrappedQuery(listener) {
+            if (binary == true) {
+                ZosUssFile(zosConnection).writeToFileBin(destFile, textBytes)
+            } else {
+                ZosUssFile(zosConnection).writeToFile(destFile, textBytes)
+            }
+        }
+        listener.logger.println(Messages.zdevops_declarative_writing_file_success(destFile))
+    } else {
+        listener.logger.println(Messages.zdevops_declarative_writing_skip())
+    }
 }
