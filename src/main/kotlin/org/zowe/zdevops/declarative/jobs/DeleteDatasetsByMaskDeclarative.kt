@@ -10,16 +10,15 @@
 
 package org.zowe.zdevops.declarative.jobs
 
-import org.zowe.kotlinsdk.zowe.client.sdk.core.ZOSConnection
-import org.zowe.zdevops.declarative.AbstractZosmfAction
-import org.zowe.zdevops.logic.DeleteOperation
 import hudson.*
-import hudson.FilePath
 import hudson.model.Run
 import hudson.model.TaskListener
 import org.jenkinsci.Symbol
 import org.kohsuke.stapler.DataBoundConstructor
 import org.kohsuke.stapler.DataBoundSetter
+import org.zowe.kotlinsdk.zowe.client.sdk.core.ZOSConnection
+import org.zowe.zdevops.declarative.AbstractZosmfAction
+import org.zowe.zdevops.logic.deleteDatasetsByMask
 
 /**
  * This class contains bulk delete mainframe datasets operation description
@@ -71,7 +70,7 @@ class DeleteDatasetsByMaskDeclarative @DataBoundConstructor constructor(
         listener: TaskListener,
         zosConnection: ZOSConnection
     ) {
-        DeleteOperation.deleteDatasetsByMask(mask, zosConnection,listener)
+        deleteDatasetsByMask(mask, zosConnection,listener)
     }
 
 

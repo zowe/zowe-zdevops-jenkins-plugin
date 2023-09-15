@@ -10,16 +10,15 @@
 
 package org.zowe.zdevops.declarative.jobs
 
-import org.zowe.kotlinsdk.zowe.client.sdk.core.ZOSConnection
-import org.zowe.zdevops.declarative.AbstractZosmfAction
-import org.zowe.zdevops.logic.DeleteOperation
 import hudson.*
-import hudson.FilePath
 import hudson.model.Run
 import hudson.model.TaskListener
 import org.jenkinsci.Symbol
 import org.kohsuke.stapler.DataBoundConstructor
 import org.kohsuke.stapler.DataBoundSetter
+import org.zowe.kotlinsdk.zowe.client.sdk.core.ZOSConnection
+import org.zowe.zdevops.declarative.AbstractZosmfAction
+import org.zowe.zdevops.logic.deleteDatasetOrMember
 
 /**
  * This class contains delete mainframe dataset operation description
@@ -84,7 +83,7 @@ class DeleteDatasetDeclarative @DataBoundConstructor constructor(
         listener: TaskListener,
         zosConnection: ZOSConnection
     ) {
-        DeleteOperation.deleteDatasetOrMember(dsn, member, zosConnection, listener)
+        deleteDatasetOrMember(dsn, member, zosConnection, listener)
     }
 
     @Symbol("deleteDataset")

@@ -99,7 +99,7 @@ class DownloadFileDeclarativeSpec : ShouldSpec({
         DownloadFileDeclarative("TEST")
       )
       downloadFileDecl.setVol("TEST")
-      downloadFileDecl.setGetETag(false)
+      downloadFileDecl.setReturnEtag(false)
       downloadFileDecl.perform(
         run,
         workspace,

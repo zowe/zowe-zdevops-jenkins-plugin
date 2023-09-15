@@ -10,17 +10,14 @@
 
 package org.zowe.zdevops.declarative.jobs
 
-import hudson.AbortException
 import hudson.EnvVars
 import hudson.FilePath
 import hudson.model.Item
 import io.kotest.assertions.assertSoftly
 import io.kotest.assertions.fail
-import io.kotest.assertions.shouldFail
 import io.kotest.core.spec.style.ShouldSpec
 import io.kotest.matchers.shouldBe
 import io.kotest.matchers.string.shouldContain
-import io.kotest.matchers.types.shouldBeSameInstanceAs
 import io.mockk.every
 import io.mockk.mockk
 import io.mockk.spyk

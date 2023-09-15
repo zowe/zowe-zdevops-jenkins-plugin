@@ -10,9 +10,6 @@
 
 package org.zowe.zdevops.declarative
 
-import org.zowe.kotlinsdk.zowe.client.sdk.core.ZOSConnection
-import org.zowe.zdevops.Messages
-import org.zowe.zdevops.config.ZOSConnectionList
 import hudson.AbortException
 import hudson.EnvVars
 import hudson.FilePath
@@ -23,6 +20,9 @@ import hudson.model.TaskListener
 import hudson.tasks.BuildStepDescriptor
 import hudson.tasks.Builder
 import jenkins.tasks.SimpleBuildStep
+import org.zowe.kotlinsdk.zowe.client.sdk.core.ZOSConnection
+import org.zowe.zdevops.Messages
+import org.zowe.zdevops.config.ZOSConnectionList
 import java.io.PrintWriter
 import java.io.StringWriter
 import java.net.URL
@@ -63,7 +63,7 @@ abstract class AbstractZosmfAction : Builder(), SimpleBuildStep {
   companion object {
     open class DefaultBuildDescriptor(private val descriptorDisplayName: String = ""): BuildStepDescriptor<Builder?>() {
       override fun getDisplayName() = descriptorDisplayName
-      override fun isApplicable(jobType: Class<out AbstractProject<*, *>>?) = true
+      override fun isApplicable(jobType: Class<out AbstractProject<*, *>>?) = false
     }
   }
 

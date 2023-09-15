@@ -10,15 +10,14 @@
 
 package org.zowe.zdevops.declarative.jobs
 
-import org.zowe.kotlinsdk.zowe.client.sdk.core.ZOSConnection
-import org.zowe.zdevops.declarative.AbstractZosmfAction
 import hudson.*
-import hudson.FilePath
 import hudson.model.Run
 import hudson.model.TaskListener
 import org.jenkinsci.Symbol
 import org.kohsuke.stapler.DataBoundConstructor
-import org.zowe.zdevops.logic.WriteOperation.Companion.writeToDataset
+import org.zowe.kotlinsdk.zowe.client.sdk.core.ZOSConnection
+import org.zowe.zdevops.declarative.AbstractZosmfAction
+import org.zowe.zdevops.logic.writeToDataset
 
 class WriteToDatasetDeclarative @DataBoundConstructor constructor(private val dsn: String,
                                                                   private val text: String) :

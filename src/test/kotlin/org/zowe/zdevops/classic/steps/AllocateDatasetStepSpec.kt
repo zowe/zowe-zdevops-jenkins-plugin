@@ -11,6 +11,7 @@
 package org.zowe.zdevops.classic.steps
 
 import hudson.model.Item
+import hudson.util.FormValidation
 import io.kotest.assertions.assertSoftly
 import io.kotest.assertions.fail
 import io.kotest.core.spec.style.ShouldSpec
@@ -24,6 +25,7 @@ import org.zowe.kotlinsdk.DatasetOrganization
 import org.zowe.kotlinsdk.RecordFormat
 import org.zowe.kotlinsdk.zowe.client.sdk.core.ZOSConnection
 import org.zowe.zdevops.MOCK_SERVER_HOST
+import org.zowe.zdevops.Messages
 import org.zowe.zdevops.MockResponseDispatcher
 import org.zowe.zdevops.MockServerFactory
 import java.io.File
@@ -104,6 +106,43 @@ class AllocateDatasetStepSpec : ShouldSpec({
             )
             assertSoftly { isDatasetAllocating shouldBe true }
             assertSoftly { isDatasetAllocated shouldBe true }
+        }
+    }
+
+    val descriptor = AllocateDatasetStep.DescriptorImpl()
+    context("classic/steps module: AllocateDatasetStepDescriptor") {
+        should("validate primary allocation size") {
+            descriptor.doCheckPrimary("") shouldBe FormValidation.ok()
+            descriptor.doCheckPrimary("100") shouldBe FormValidation.ok()
+            descriptor.doCheckPrimary("0") shouldBe FormValidation.error(Messages.zdevops_classic_allocateDatasetStep_primary_is_zero_validation())
+            descriptor.doCheckPrimary("abc") shouldBe FormValidation.error(Messages.zdevops_value_is_not_number_validation())
+        }
+
+        should("validate secondary allocation size") {
+            descriptor.doCheckSecondary("") shouldBe FormValidation.ok()
+            descriptor.doCheckSecondary("200") shouldBe FormValidation.ok()
+            descriptor.doCheckSecondary("xyz") shouldBe FormValidation.error(Messages.zdevops_value_is_not_number_validation())
+        }
+
+        should("validate block size") {
+            descriptor.doCheckBlkSize("", "") shouldBe FormValidation.ok()
+            descriptor.doCheckBlkSize("80", "240") shouldBe FormValidation.ok()
+            descriptor.doCheckBlkSize("240","80") shouldBe FormValidation.warning(Messages.zdevops_classic_allocateDatasetStep_blksize_smaller_than_lrecl_validation())
+            descriptor.doCheckBlkSize("80","abc") shouldBe FormValidation.warning(Messages.zdevops_value_is_not_number_validation())
+            descriptor.doCheckBlkSize("80","200") shouldBe FormValidation.warning(Messages.zdevops_classic_allocateDatasetStep_blksize_validation_warning())
+        }
+
+        should("validate dataset name") {
+            descriptor.doCheckDsn("") shouldBe FormValidation.error(Messages.zdevops_value_must_not_be_empty_validation())
+            descriptor.doCheckDsn("MY_DATASET") shouldBe FormValidation.error(Messages.zdevops_dataset_name_is_invalid_validation())
+        }
+
+        should("convert string and validate positive integer") {
+            descriptor.convertStringAndValidateIntPositive("") shouldBe FormValidation.ok()
+            descriptor.convertStringAndValidateIntPositive("100") shouldBe FormValidation.ok()
+            descriptor.convertStringAndValidateIntPositive("0") shouldBe FormValidation.ok()
+            descriptor.convertStringAndValidateIntPositive("-10") shouldBe FormValidation.error(Messages.zdevops_value_must_be_positive_number_validation())
+            descriptor.convertStringAndValidateIntPositive("abc") shouldBe FormValidation.error(Messages.zdevops_value_is_not_number_validation())
         }
     }
 })

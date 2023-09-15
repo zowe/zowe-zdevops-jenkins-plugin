@@ -20,7 +20,7 @@ import org.kohsuke.stapler.QueryParameter
 import org.zowe.kotlinsdk.zowe.client.sdk.core.ZOSConnection
 import org.zowe.zdevops.Messages
 import org.zowe.zdevops.classic.AbstractBuildStep
-import org.zowe.zdevops.logic.WriteOperation.Companion.writeToMember
+import org.zowe.zdevops.logic.writeToMember
 import org.zowe.zdevops.utils.validateDatasetName
 import org.zowe.zdevops.utils.validateFieldIsNotEmpty
 import org.zowe.zdevops.utils.validateMemberName
@@ -59,6 +59,7 @@ constructor(
         listener: BuildListener,
         zosConnection: ZOSConnection
     ) {
+        listener.logger.println(Messages.zdevops_declarative_writing_DS_from_input(dsn, zosConnection.host, zosConnection.zosmfPort))
         writeToMember(listener, zosConnection, dsn, member, text)
     }
 
