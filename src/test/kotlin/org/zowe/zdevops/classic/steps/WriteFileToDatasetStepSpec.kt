@@ -17,9 +17,7 @@ import io.kotest.assertions.assertSoftly
 import io.kotest.assertions.fail
 import io.kotest.core.spec.style.ShouldSpec
 import io.kotest.matchers.shouldBe
-import io.mockk.every
-import io.mockk.mockk
-import io.mockk.spyk
+import io.mockk.*
 import okhttp3.mockwebserver.MockResponse
 import okhttp3.mockwebserver.MockWebServer
 import org.zowe.kotlinsdk.zowe.client.sdk.core.ZOSConnection
@@ -41,6 +39,7 @@ class WriteFileToDatasetStepSpec : ShouldSpec({
     }
     afterSpec {
         mockServerFactory.stopMockServer()
+        clearAllMocks()
     }
     context("classic/steps module: WriteFileToDatasetStep") {
         val virtualChannel = TestVirtualChannel()
@@ -56,7 +55,7 @@ class WriteFileToDatasetStepSpec : ShouldSpec({
         val build = object:TestBuild(project) {
             override fun getExecutor(): Executor {
                 val mockInstance = mockk<Executor>()
-                val mockDir = Paths.get(rootDir, "src", "test", "resources", "mock", "test_file.txt").toString()
+                val mockDir = Paths.get(rootDir, "src", "test", "resources", "mock").toString()
                 every { mockInstance.currentWorkspace } returns FilePath(virtualChannel, mockDir)
                 return mockInstance
             }
