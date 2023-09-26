@@ -23,7 +23,17 @@ import org.zowe.zdevops.classic.AbstractBuildStep
 import org.zowe.zdevops.logic.writeToFile
 import org.zowe.zdevops.utils.validateFieldIsNotEmpty
 
+/**
+ * A build step for writing text(string) to a USS file
+ */
 class WriteToFileStep
+/**
+ * Constructs a new instance of WriteToFileStep.
+ *
+ * @param filePath The name of the z/OS connection
+ * @param text The name of the dataset
+ * @param binary The name of the member
+ */
 @DataBoundConstructor
 constructor(
     connectionName: String,
