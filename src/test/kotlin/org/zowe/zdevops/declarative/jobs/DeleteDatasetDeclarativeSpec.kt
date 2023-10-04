@@ -16,6 +16,7 @@ import hudson.model.Item
 import io.kotest.assertions.assertSoftly
 import io.kotest.assertions.fail
 import io.kotest.core.spec.style.ShouldSpec
+import io.kotest.engine.spec.tempdir
 import io.kotest.matchers.shouldBe
 import io.kotest.matchers.string.shouldContain
 import io.mockk.every
@@ -29,7 +30,6 @@ import org.zowe.zdevops.MockResponseDispatcher
 import org.zowe.zdevops.MockServerFactory
 import java.io.File
 import java.io.PrintStream
-import java.nio.file.Paths
 
 class DeleteDatasetDeclarativeSpec : ShouldSpec({
   lateinit var mockServer: MockWebServer
@@ -46,11 +46,10 @@ class DeleteDatasetDeclarativeSpec : ShouldSpec({
   context("declarative/jobs module: DeleteDatasetDeclarative") {
     val virtualChannel = TestVirtualChannel()
     val zosConnection = ZOSConnection(mockServer.hostName, mockServer.port.toString(), "test", "test", "https")
-    val rootDir = Paths.get("").toAbsolutePath().toString()
-    val trashDir = Paths.get(rootDir, "src", "test", "resources", "trash").toString()
+    val trashDir = tempdir()
     val itemGroup = object : TestItemGroup() {
       override fun getRootDirFor(child: Item?): File {
-        return File(trashDir)
+        return trashDir
       }
     }
     val job = TestJob(itemGroup, "test")

@@ -14,6 +14,7 @@ import hudson.model.Item
 import io.kotest.assertions.assertSoftly
 import io.kotest.assertions.fail
 import io.kotest.core.spec.style.ShouldSpec
+import io.kotest.engine.spec.tempdir
 import io.kotest.matchers.shouldBe
 import io.mockk.every
 import io.mockk.mockk
@@ -30,7 +31,6 @@ import org.zowe.zdevops.declarative.jobs.TestLauncher
 import org.zowe.zdevops.declarative.jobs.TestVirtualChannel
 import java.io.File
 import java.io.PrintStream
-import java.nio.file.Paths
 
 class WriteToDatasetStepSpec : ShouldSpec({
     lateinit var mockServer: MockWebServer
@@ -47,11 +47,10 @@ class WriteToDatasetStepSpec : ShouldSpec({
     context("classic/steps module: WriteToDatasetStep") {
         val virtualChannel = TestVirtualChannel()
         val zosConnection = ZOSConnection(mockServer.hostName, mockServer.port.toString(), "test", "test", "https")
-        val rootDir = Paths.get("").toAbsolutePath().toString()
-        val trashDir = Paths.get(rootDir, "src", "test", "resources", "trash").toString()
+        val trashDir = tempdir()
         val itemGroup = object : TestItemGroup() {
             override fun getRootDirFor(child: Item?): File {
-                return File(trashDir)
+                return trashDir
             }
         }
         val project = TestProject(itemGroup, "test")

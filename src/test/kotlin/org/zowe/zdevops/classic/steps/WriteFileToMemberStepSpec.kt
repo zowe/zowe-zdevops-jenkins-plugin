@@ -14,6 +14,7 @@ import hudson.model.Item
 import io.kotest.assertions.assertSoftly
 import io.kotest.assertions.fail
 import io.kotest.core.spec.style.ShouldSpec
+import io.kotest.engine.spec.tempdir
 import io.kotest.matchers.shouldBe
 import io.mockk.every
 import io.mockk.mockk
@@ -44,11 +45,11 @@ class WriteFileToMemberStepSpec : ShouldSpec({
         val virtualChannel = TestVirtualChannel()
         val zosConnection = ZOSConnection(mockServer.hostName, mockServer.port.toString(), "test", "test", "https")
         val rootDir = Paths.get("").toAbsolutePath().toString()
-        val trashDir = Paths.get(rootDir, "src", "test", "resources", "trash").toString()
+        val trashDir = tempdir()
         val mockDir = Paths.get(rootDir, "src", "test", "resources", "mock").toString()
         val itemGroup = object : TestItemGroup() {
             override fun getRootDirFor(child: Item?): File {
-                return File(trashDir)
+                return trashDir
             }
         }
         val project = TestProject(itemGroup, "test")

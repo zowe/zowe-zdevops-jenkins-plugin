@@ -15,6 +15,7 @@ import hudson.util.FormValidation
 import io.kotest.assertions.assertSoftly
 import io.kotest.assertions.fail
 import io.kotest.core.spec.style.ShouldSpec
+import io.kotest.engine.spec.tempdir
 import io.kotest.matchers.shouldBe
 import io.mockk.every
 import io.mockk.mockk
@@ -46,10 +47,10 @@ class AllocateDatasetStepSpec : ShouldSpec({
     }
     context("classic/steps module: AllocateDatasetStep") {
         val rootDir = Paths.get("").toAbsolutePath().toString()
-        val trashDir = Paths.get(rootDir, "src", "test", "resources", "trash").toString()
+        val trashDir = tempdir()
         val itemGroup = object : TestItemGroup() {
             override fun getRootDirFor(child: Item?): File {
-                return File(trashDir)
+                return trashDir
             }
         }
         val project = TestProject(itemGroup, "test")

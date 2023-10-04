@@ -19,6 +19,7 @@ import io.kotest.assertions.assertSoftly
 import io.kotest.assertions.fail
 import io.kotest.assertions.throwables.shouldThrow
 import io.kotest.core.spec.style.ShouldSpec
+import io.kotest.engine.spec.tempdir
 import io.kotest.matchers.shouldBe
 import io.mockk.every
 import io.mockk.mockk
@@ -36,7 +37,6 @@ import org.zowe.zdevops.declarative.jobs.TestLauncher
 import org.zowe.zdevops.declarative.jobs.TestVirtualChannel
 import java.io.File
 import java.io.PrintStream
-import java.nio.file.Paths
 
 class DownloadDatasetStepSpec : ShouldSpec({
     lateinit var mockServer: MockWebServer
@@ -53,19 +53,18 @@ class DownloadDatasetStepSpec : ShouldSpec({
     context("classic/steps module: DownloadDatasetStep") {
         val virtualChannel = TestVirtualChannel()
         val zosConnection = ZOSConnection(mockServer.hostName, mockServer.port.toString(), "test", "test", "https")
-        val rootDir = Paths.get("").toAbsolutePath().toString()
-        val trashDir = Paths.get(rootDir, "src", "test", "resources", "trash").toString()
+        val trashDir = tempdir()
         val itemGroup = object : TestItemGroup() {
             override fun getRootDirFor(child: Item?): File {
-                return File(trashDir)
+                return trashDir
             }
         }
         val project = TestProject(itemGroup, "test")
         val build = object:TestBuild(project) {
             override fun getExecutor(): Executor {
                 val mockInstance = mockk<Executor>()
-                val mockDir = Paths.get(rootDir, "src", "test", "resources", "trash").toString()
-                every { mockInstance.currentWorkspace } returns FilePath(virtualChannel, mockDir)
+                val mockDir = tempdir()
+                every { mockInstance.currentWorkspace } returns FilePath(virtualChannel, mockDir.absolutePath)
                 return mockInstance
             }
         }
