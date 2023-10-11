@@ -22,7 +22,9 @@ import io.mockk.mockk
 import io.mockk.spyk
 import okhttp3.mockwebserver.MockResponse
 import okhttp3.mockwebserver.MockWebServer
+import org.zowe.kotlinsdk.AllocationUnit
 import org.zowe.kotlinsdk.DatasetOrganization
+import org.zowe.kotlinsdk.DsnameType
 import org.zowe.kotlinsdk.RecordFormat
 import org.zowe.kotlinsdk.zowe.client.sdk.core.ZOSConnection
 import org.zowe.zdevops.MOCK_SERVER_HOST
@@ -99,6 +101,20 @@ class AllocateDatasetStepSpec : ShouldSpec({
                     RecordFormat.F
                 )
             )
+            allocateDatasetStepInst.setAlcUnit(AllocationUnit.CYL)
+            allocateDatasetStepInst.setStorClass("")
+            allocateDatasetStepInst.setStorClass("TEST")
+            allocateDatasetStepInst.setMgntClass("")
+            allocateDatasetStepInst.setMgntClass("TEST")
+            allocateDatasetStepInst.setDataClass("")
+            allocateDatasetStepInst.setDataClass("TEST")
+            allocateDatasetStepInst.setVolser("")
+            allocateDatasetStepInst.setVolser("TEST")
+            allocateDatasetStepInst.setUnit("")
+            allocateDatasetStepInst.setUnit("TEST")
+            allocateDatasetStepInst.setLrecl(3120)
+            allocateDatasetStepInst.setBlkSize(3120)
+            allocateDatasetStepInst.setDsnType(DsnameType.BASIC)
             allocateDatasetStepInst.perform(
                 build,
                 launcher,

@@ -11,6 +11,7 @@
 package org.zowe.zdevops.classic.steps
 
 import hudson.model.Item
+import hudson.util.FormValidation
 import io.kotest.assertions.assertSoftly
 import io.kotest.assertions.fail
 import io.kotest.core.spec.style.ShouldSpec
@@ -23,6 +24,7 @@ import okhttp3.mockwebserver.MockResponse
 import okhttp3.mockwebserver.MockWebServer
 import org.zowe.kotlinsdk.zowe.client.sdk.core.ZOSConnection
 import org.zowe.zdevops.MOCK_SERVER_HOST
+import org.zowe.zdevops.Messages
 import org.zowe.zdevops.MockResponseDispatcher
 import org.zowe.zdevops.MockServerFactory
 import java.io.File
@@ -97,6 +99,38 @@ class WriteFileToMemberStepSpec : ShouldSpec({
             )
             assertSoftly { isWritingToDataset shouldBe true }
             assertSoftly { isWritten shouldBe true }
+        }
+    }
+
+    val descriptor = WriteFileToMemberStep.DescriptorImpl()
+    context("classic/steps module: WriteFileToMemberStep.DescriptorImpl") {
+
+        should("validate dataset name") {
+            descriptor.doCheckDsn("") shouldBe FormValidation.error(Messages.zdevops_value_must_not_be_empty_validation())
+            descriptor.doCheckDsn("MY_DATASET") shouldBe FormValidation.error(Messages.zdevops_dataset_name_is_invalid_validation())
+        }
+
+        should("validate member name") {
+            descriptor.doCheckMember("") shouldBe FormValidation.error(Messages.zdevops_value_up_to_eight_in_length_validation())
+            descriptor.doCheckMember("@MY_DS") shouldBe FormValidation.warning(Messages.zdevops_member_name_is_invalid_validation())
+            descriptor.doCheckMember("DSNAME") shouldBe FormValidation.ok()
+        }
+
+        should("validate file option") {
+            descriptor.doCheckFileOption("") shouldBe FormValidation.error(Messages.zdevops_classic_write_options_required())
+            descriptor.doCheckFileOption(descriptor.localFileOption) shouldBe FormValidation.ok()
+        }
+
+        should("validate local file path") {
+            descriptor.doCheckLocalFilePath("", fileOption = descriptor.localFileOption) shouldBe FormValidation.error(Messages.zdevops_value_must_not_be_empty_validation())
+            descriptor.doCheckLocalFilePath("D:\\file.txt", fileOption = descriptor.localFileOption) shouldBe  FormValidation.ok()
+            descriptor.doCheckLocalFilePath("", fileOption = descriptor.chooseFileOption) shouldBe FormValidation.ok()
+        }
+
+        should("validate workspace file path") {
+            descriptor.doCheckWorkspacePath("", fileOption = descriptor.workspaceFileOption) shouldBe FormValidation.error(Messages.zdevops_value_must_not_be_empty_validation())
+            descriptor.doCheckWorkspacePath("D:\\file.txt", fileOption = descriptor.workspaceFileOption) shouldBe  FormValidation.ok()
+            descriptor.doCheckWorkspacePath("", fileOption = descriptor.chooseFileOption) shouldBe FormValidation.ok()
         }
     }
 })
