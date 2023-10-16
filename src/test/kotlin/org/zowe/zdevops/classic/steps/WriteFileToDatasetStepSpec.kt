@@ -19,9 +19,7 @@ import io.kotest.assertions.fail
 import io.kotest.core.spec.style.ShouldSpec
 import io.kotest.engine.spec.tempdir
 import io.kotest.matchers.shouldBe
-import io.mockk.every
-import io.mockk.mockk
-import io.mockk.spyk
+import io.mockk.*
 import okhttp3.mockwebserver.MockResponse
 import okhttp3.mockwebserver.MockWebServer
 import org.zowe.kotlinsdk.zowe.client.sdk.core.ZOSConnection
@@ -44,6 +42,7 @@ class WriteFileToDatasetStepSpec : ShouldSpec({
     }
     afterSpec {
         mockServerFactory.stopMockServer()
+        clearAllMocks()
     }
     context("classic/steps module: WriteFileToDatasetStep") {
         val virtualChannel = TestVirtualChannel()

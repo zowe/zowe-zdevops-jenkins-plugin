@@ -20,6 +20,7 @@ import org.zowe.kotlinsdk.zowe.client.sdk.core.ZOSConnection
 import org.zowe.zdevops.declarative.AbstractZosmfAction
 import org.zowe.zdevops.logic.writeToFile
 
+
 class WriteToFileDeclarative @DataBoundConstructor constructor(private val destFile: String,
                                                                private val text: String) :
     AbstractZosmfAction() {
