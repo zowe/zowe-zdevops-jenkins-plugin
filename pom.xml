@@ -32,6 +32,15 @@
         <!-- TODO fix all warnings -->
         <spotbugs.threshold>High</spotbugs.threshold>
         <gitHubRepo>jenkinsci/${project.artifactId}-plugin</gitHubRepo>
+
+        <sonar.sourceEncoding>UTF-8</sonar.sourceEncoding>
+        <sonar.organization>zowe</sonar.organization>
+        <sonar.projectKey>zowe_zowe-zdevops-jenkins-plugin</sonar.projectKey>
+        <sonar.projectName>zowe-zdevops-jenkins-plugin</sonar.projectName>
+        <sonar.projectVersion>project.version</sonar.projectVersion>
+        <sonar.language>kotlin</sonar.language>
+        <sonar.links.scm>https://github.com/zowe/zowe-zdevops-jenkins-plugin</sonar.links.scm>
+
     </properties>
 
     <licenses>
