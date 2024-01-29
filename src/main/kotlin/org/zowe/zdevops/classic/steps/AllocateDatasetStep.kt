@@ -26,7 +26,7 @@ import org.zowe.kotlinsdk.RecordFormat
 import org.zowe.kotlinsdk.zowe.client.sdk.core.ZOSConnection
 import org.zowe.zdevops.Messages
 import org.zowe.zdevops.classic.AbstractBuildStep
-import org.zowe.zdevops.logic.AllocateOperation.Companion.allocateDataset
+import org.zowe.zdevops.logic.allocateDataset
 import org.zowe.zdevops.utils.validateDatasetName
 import java.io.IOException
 import javax.servlet.ServletException

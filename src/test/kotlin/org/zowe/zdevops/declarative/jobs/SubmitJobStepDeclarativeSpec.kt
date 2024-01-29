@@ -16,6 +16,7 @@ import hudson.model.Item
 import io.kotest.assertions.assertSoftly
 import io.kotest.assertions.fail
 import io.kotest.core.spec.style.ShouldSpec
+import io.kotest.engine.spec.tempdir
 import io.kotest.matchers.shouldBe
 import io.mockk.every
 import io.mockk.mockk
@@ -28,8 +29,6 @@ import org.zowe.zdevops.MockResponseDispatcher
 import org.zowe.zdevops.MockServerFactory
 import java.io.File
 import java.io.PrintStream
-import java.nio.file.Paths
-import java.nio.file.Paths.*
 
 class SubmitJobStepDeclarativeSpec : ShouldSpec({
   lateinit var mockServer: MockWebServer
@@ -53,11 +52,10 @@ class SubmitJobStepDeclarativeSpec : ShouldSpec({
     should("perform SubmitJobStepDeclarative operation") {
       var isJobSubmitting = false
       var isJobSubmitted = false
-      val rootDir = get("").toAbsolutePath().toString()
-      val trashDir = get(rootDir, "src", "test", "resources", "trash").toString()
+      val trashDir = tempdir()
       val itemGroup = object : TestItemGroup() {
         override fun getRootDirFor(child: Item?): File {
-          return File(trashDir)
+          return trashDir
         }
       }
       val job = TestJob(itemGroup, "test")

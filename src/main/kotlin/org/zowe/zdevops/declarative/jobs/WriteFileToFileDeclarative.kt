@@ -10,16 +10,15 @@
 
 package org.zowe.zdevops.declarative.jobs
 
-import org.zowe.kotlinsdk.zowe.client.sdk.core.ZOSConnection
-import org.zowe.kotlinsdk.zowe.client.sdk.zosuss.ZosUssFile
-import org.zowe.zdevops.declarative.AbstractZosmfAction
 import hudson.*
-import hudson.FilePath
 import hudson.model.Run
 import hudson.model.TaskListener
 import org.jenkinsci.Symbol
 import org.kohsuke.stapler.DataBoundConstructor
 import org.kohsuke.stapler.DataBoundSetter
+import org.zowe.kotlinsdk.zowe.client.sdk.core.ZOSConnection
+import org.zowe.zdevops.declarative.AbstractZosmfAction
+import org.zowe.zdevops.logic.writeToFile
 import java.io.File
 import java.nio.file.Paths
 
@@ -31,6 +30,8 @@ class WriteFileToFileDeclarative @DataBoundConstructor constructor(private val d
 
     @DataBoundSetter
     fun setBinary(binary: Boolean) { this.binary = binary }
+
+    fun getBinary(): Boolean? { return binary }
 
     override val exceptionMessage: String = zMessages.zdevops_declarative_writing_file_fail(destFile)
 
@@ -52,12 +53,7 @@ class WriteFileToFileDeclarative @DataBoundConstructor constructor(private val d
         }
 
         val text = textFile.readBytes()
-        if (binary == true) {
-            ZosUssFile(zosConnection).writeToFileBin(destFile, text)
-        } else {
-            ZosUssFile(zosConnection).writeToFile(destFile, text)
-        }
-        listener.logger.println(zMessages.zdevops_declarative_writing_file_success(destFile))
+        writeToFile(listener, zosConnection, destFile, text, binary)
     }
 
 

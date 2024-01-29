@@ -17,8 +17,9 @@ import org.jenkinsci.Symbol
 import org.kohsuke.stapler.DataBoundConstructor
 import org.kohsuke.stapler.DataBoundSetter
 import org.zowe.kotlinsdk.zowe.client.sdk.core.ZOSConnection
-import org.zowe.kotlinsdk.zowe.client.sdk.zosuss.ZosUssFile
 import org.zowe.zdevops.declarative.AbstractZosmfAction
+import org.zowe.zdevops.logic.writeToFile
+
 
 class WriteToFileDeclarative @DataBoundConstructor constructor(private val destFile: String,
                                                                private val text: String) :
@@ -40,16 +41,8 @@ class WriteToFileDeclarative @DataBoundConstructor constructor(private val destF
         zosConnection: ZOSConnection
     ) {
         listener.logger.println(zMessages.zdevops_declarative_writing_file_from_input(destFile, zosConnection.host, zosConnection.zosmfPort))
-        if (text != "") {
-            if (binary == true) {
-                ZosUssFile(zosConnection).writeToFileBin(destFile, text.toByteArray())
-            } else {
-                ZosUssFile(zosConnection).writeToFile(destFile, text.toByteArray())
-            }
-            listener.logger.println(zMessages.zdevops_declarative_writing_file_success(destFile))
-        } else {
-            listener.logger.println(zMessages.zdevops_declarative_writing_skip())
-        }
+        val textBytes = text.toByteArray()
+        writeToFile(listener, zosConnection, destFile, textBytes, binary)
     }
 
 

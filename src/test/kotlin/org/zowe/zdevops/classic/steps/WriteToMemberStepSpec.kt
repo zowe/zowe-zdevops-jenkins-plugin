@@ -11,9 +11,11 @@
 package org.zowe.zdevops.classic.steps
 
 import hudson.model.Item
+import hudson.util.FormValidation
 import io.kotest.assertions.assertSoftly
-import io.kotest.core.spec.style.ShouldSpec
 import io.kotest.assertions.fail
+import io.kotest.core.spec.style.ShouldSpec
+import io.kotest.engine.spec.tempdir
 import io.kotest.matchers.shouldBe
 import io.mockk.every
 import io.mockk.mockk
@@ -22,11 +24,11 @@ import okhttp3.mockwebserver.MockResponse
 import okhttp3.mockwebserver.MockWebServer
 import org.zowe.kotlinsdk.zowe.client.sdk.core.ZOSConnection
 import org.zowe.zdevops.MOCK_SERVER_HOST
+import org.zowe.zdevops.Messages
 import org.zowe.zdevops.MockResponseDispatcher
 import org.zowe.zdevops.MockServerFactory
 import java.io.File
 import java.io.PrintStream
-import java.nio.file.Paths
 
 
 class WriteToMemberStepSpec : ShouldSpec({
@@ -44,11 +46,10 @@ class WriteToMemberStepSpec : ShouldSpec({
     context("classic/steps module: WriteToMemberStep") {
         val virtualChannel = TestVirtualChannel()
         val zosConnection = ZOSConnection(mockServer.hostName, mockServer.port.toString(), "test", "test", "https")
-        val rootDir = Paths.get("").toAbsolutePath().toString()
-        val trashDir = Paths.get(rootDir, "src", "test", "resources", "trash").toString()
+        val trashDir = tempdir()
         val itemGroup = object : TestItemGroup() {
             override fun getRootDirFor(child: Item?): File {
-                return File(trashDir)
+                return trashDir
             }
         }
         val project = TestProject(itemGroup, "test")
@@ -95,6 +96,26 @@ class WriteToMemberStepSpec : ShouldSpec({
             )
             assertSoftly { isWritingToDataset shouldBe true }
             assertSoftly { isWritten shouldBe true }
+        }
+    }
+
+    val descriptor = WriteToMemberStep.DescriptorImpl()
+    context("classic/steps module: WriteToMemberStep.DescriptorImpl") {
+
+        should("validate dataset name") {
+            descriptor.doCheckDsn("") shouldBe FormValidation.error(Messages.zdevops_value_must_not_be_empty_validation())
+            descriptor.doCheckDsn("MY_DATASET") shouldBe FormValidation.error(Messages.zdevops_dataset_name_is_invalid_validation())
+        }
+
+        should("validate member name") {
+            descriptor.doCheckMember("") shouldBe FormValidation.error(Messages.zdevops_value_up_to_eight_in_length_validation())
+            descriptor.doCheckMember("@MY_DS") shouldBe FormValidation.warning(Messages.zdevops_member_name_is_invalid_validation())
+            descriptor.doCheckMember("DSNAME") shouldBe FormValidation.ok()
+        }
+
+        should("validate text") {
+            descriptor.doCheckText("") shouldBe FormValidation.error(Messages.zdevops_value_must_not_be_empty_validation())
+            descriptor.doCheckText("text") shouldBe FormValidation.ok()
         }
     }
 })

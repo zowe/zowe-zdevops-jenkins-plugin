@@ -33,7 +33,7 @@ import javax.servlet.ServletException
 /**
  * The AbstractBuildStep class is an abstract class that serves as the base for the plugin build steps in Jenkins.
  */
-abstract class AbstractBuildStep(private val connectionName: String) : Builder(), SimpleBuildStep {
+abstract class AbstractBuildStep(val connectionName: String) : Builder(), SimpleBuildStep {
     /**
      * Performs the build step.
      *

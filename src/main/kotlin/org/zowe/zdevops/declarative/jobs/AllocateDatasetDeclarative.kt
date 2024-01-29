@@ -12,9 +12,6 @@ package org.zowe.zdevops.declarative.jobs
 
 import hudson.EnvVars
 import hudson.Extension
-import org.zowe.kotlinsdk.*
-import org.zowe.kotlinsdk.zowe.client.sdk.core.ZOSConnection
-import org.zowe.zdevops.declarative.AbstractZosmfAction
 import hudson.FilePath
 import hudson.Launcher
 import hudson.model.Run
@@ -22,8 +19,11 @@ import hudson.model.TaskListener
 import org.jenkinsci.Symbol
 import org.kohsuke.stapler.DataBoundConstructor
 import org.kohsuke.stapler.DataBoundSetter
+import org.zowe.kotlinsdk.*
+import org.zowe.kotlinsdk.zowe.client.sdk.core.ZOSConnection
 import org.zowe.zdevops.Messages
-import org.zowe.zdevops.logic.AllocateOperation.Companion.allocateDataset
+import org.zowe.zdevops.declarative.AbstractZosmfAction
+import org.zowe.zdevops.logic.allocateDataset
 
 /**
  * Represents an action for allocating a dataset in a declarative style

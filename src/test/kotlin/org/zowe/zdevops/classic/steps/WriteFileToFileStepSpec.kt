@@ -10,6 +10,8 @@
 
 package org.zowe.zdevops.classic.steps
 
+import hudson.FilePath
+import hudson.model.Executor
 import hudson.model.Item
 import hudson.util.FormValidation
 import io.kotest.assertions.assertSoftly
@@ -31,7 +33,7 @@ import java.io.File
 import java.io.PrintStream
 import java.nio.file.Paths
 
-class WriteFileToMemberStepSpec : ShouldSpec({
+class WriteFileToFileStepSpec : ShouldSpec({
     lateinit var mockServer: MockWebServer
     lateinit var responseDispatcher: MockResponseDispatcher
     val mockServerFactory = MockServerFactory()
@@ -43,25 +45,31 @@ class WriteFileToMemberStepSpec : ShouldSpec({
     afterSpec {
         mockServerFactory.stopMockServer()
     }
-    context("classic/steps module: WriteFileToMemberStep") {
+    context("classic/steps module: WriteFileToFileStep") {
         val virtualChannel = TestVirtualChannel()
         val zosConnection = ZOSConnection(mockServer.hostName, mockServer.port.toString(), "test", "test", "https")
         val rootDir = Paths.get("").toAbsolutePath().toString()
         val trashDir = tempdir()
-        val mockDir = Paths.get(rootDir, "src", "test", "resources", "mock").toString()
         val itemGroup = object : TestItemGroup() {
             override fun getRootDirFor(child: Item?): File {
                 return trashDir
             }
         }
         val project = TestProject(itemGroup, "test")
-        val build = TestBuild(project)
+        val build = object:TestBuild(project) {
+            override fun getExecutor(): Executor {
+                val mockInstance = mockk<Executor>()
+                val mockDir = Paths.get(rootDir, "src", "test", "resources", "mock").toString()
+                every { mockInstance.currentWorkspace } returns FilePath(virtualChannel, mockDir)
+                return mockInstance
+            }
+        }
 
         afterEach {
             responseDispatcher.removeAllEndpoints()
         }
-        should("perform WriteFileToMemberStep operation to write a file to a member") {
-            var isWritingToDataset = false
+        should("perform WriteFileToFileStep operation to write a local file to a USS file") {
+            var isWritingToFile = false
             var isWritten = false
             val taskListener = object : TestBuildListener() {
                 override fun getLogger(): PrintStream {
@@ -69,9 +77,9 @@ class WriteFileToMemberStepSpec : ShouldSpec({
                     every {
                         logger.println(any<String>())
                     } answers {
-                        if (firstArg<String>().contains("Writing to dataset")) {
-                            isWritingToDataset = true
-                        } else if (firstArg<String>().contains("Data has been written to dataset")) {
+                        if (firstArg<String>().contains("Writing to Unix file")) {
+                            isWritingToFile = true
+                        } else if (firstArg<String>().contains("Data has been written to Unix file")) {
                             isWritten = true
                         } else {
                             fail("Unexpected logger message: ${firstArg<String>()}")
@@ -82,39 +90,28 @@ class WriteFileToMemberStepSpec : ShouldSpec({
             }
             val launcher = TestLauncher(taskListener, virtualChannel)
             responseDispatcher.injectEndpoint(
-                "${this.testCase.name.testName}_listDataSets",
-                { it?.requestLine?.contains("zosmf/restfiles/ds") ?: false },
-                { MockResponse().setBody(responseDispatcher.readMockJson("listDataSets") ?: "") }
+                "${this.testCase.name.testName}_UssFile",
+                { it?.requestLine?.contains("zosmf/restfiles/fs") ?: false },
+                { MockResponse().setBody("") }
             )
 
-            val writeFileToMemberDecl = spyk(
-                WriteFileToMemberStep("test", "TEST.IJMP.DATASET1", "#1", "local")
+            val writeFileToFileDecl = spyk(
+                WriteFileToFileStep("test", "/u/TEST/test.txt", false, "workspace")
             )
-            writeFileToMemberDecl.setLocalFilePath(mockDir + "/test_file.txt")
-            writeFileToMemberDecl.perform(
+            writeFileToFileDecl.setWorkspacePath("test_file.txt")
+            writeFileToFileDecl.perform(
                 build,
                 launcher,
                 taskListener,
                 zosConnection
             )
-            assertSoftly { isWritingToDataset shouldBe true }
+            assertSoftly { isWritingToFile shouldBe true }
             assertSoftly { isWritten shouldBe true }
         }
     }
 
-    val descriptor = WriteFileToMemberStep.DescriptorImpl()
-    context("classic/steps module: WriteFileToMemberStep.DescriptorImpl") {
-
-        should("validate dataset name") {
-            descriptor.doCheckDsn("") shouldBe FormValidation.error(Messages.zdevops_value_must_not_be_empty_validation())
-            descriptor.doCheckDsn("MY_DATASET") shouldBe FormValidation.error(Messages.zdevops_dataset_name_is_invalid_validation())
-        }
-
-        should("validate member name") {
-            descriptor.doCheckMember("") shouldBe FormValidation.error(Messages.zdevops_value_up_to_eight_in_length_validation())
-            descriptor.doCheckMember("@MY_DS") shouldBe FormValidation.warning(Messages.zdevops_member_name_is_invalid_validation())
-            descriptor.doCheckMember("DSNAME") shouldBe FormValidation.ok()
-        }
+    val descriptor = WriteFileToFileStep.DescriptorImpl()
+    context("classic/steps module: WriteFileToFileStep.DescriptorImpl") {
 
         should("validate file option") {
             descriptor.doCheckFileOption("") shouldBe FormValidation.error(Messages.zdevops_classic_write_options_required())
@@ -122,13 +119,15 @@ class WriteFileToMemberStepSpec : ShouldSpec({
         }
 
         should("validate local file path") {
-            descriptor.doCheckLocalFilePath("", fileOption = descriptor.localFileOption) shouldBe FormValidation.error(Messages.zdevops_value_must_not_be_empty_validation())
+            descriptor.doCheckLocalFilePath("", fileOption = descriptor.localFileOption) shouldBe FormValidation.error(
+                Messages.zdevops_value_must_not_be_empty_validation())
             descriptor.doCheckLocalFilePath("D:\\file.txt", fileOption = descriptor.localFileOption) shouldBe  FormValidation.ok()
             descriptor.doCheckLocalFilePath("", fileOption = descriptor.chooseFileOption) shouldBe FormValidation.ok()
         }
 
         should("validate workspace file path") {
-            descriptor.doCheckWorkspacePath("", fileOption = descriptor.workspaceFileOption) shouldBe FormValidation.error(Messages.zdevops_value_must_not_be_empty_validation())
+            descriptor.doCheckWorkspacePath("", fileOption = descriptor.workspaceFileOption) shouldBe FormValidation.error(
+                Messages.zdevops_value_must_not_be_empty_validation())
             descriptor.doCheckWorkspacePath("D:\\file.txt", fileOption = descriptor.workspaceFileOption) shouldBe  FormValidation.ok()
             descriptor.doCheckWorkspacePath("", fileOption = descriptor.chooseFileOption) shouldBe FormValidation.ok()
         }

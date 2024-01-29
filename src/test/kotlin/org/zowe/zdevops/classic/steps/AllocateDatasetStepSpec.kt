@@ -15,13 +15,16 @@ import hudson.util.FormValidation
 import io.kotest.assertions.assertSoftly
 import io.kotest.assertions.fail
 import io.kotest.core.spec.style.ShouldSpec
+import io.kotest.engine.spec.tempdir
 import io.kotest.matchers.shouldBe
 import io.mockk.every
 import io.mockk.mockk
 import io.mockk.spyk
 import okhttp3.mockwebserver.MockResponse
 import okhttp3.mockwebserver.MockWebServer
+import org.zowe.kotlinsdk.AllocationUnit
 import org.zowe.kotlinsdk.DatasetOrganization
+import org.zowe.kotlinsdk.DsnameType
 import org.zowe.kotlinsdk.RecordFormat
 import org.zowe.kotlinsdk.zowe.client.sdk.core.ZOSConnection
 import org.zowe.zdevops.MOCK_SERVER_HOST
@@ -46,10 +49,10 @@ class AllocateDatasetStepSpec : ShouldSpec({
     }
     context("classic/steps module: AllocateDatasetStep") {
         val rootDir = Paths.get("").toAbsolutePath().toString()
-        val trashDir = Paths.get(rootDir, "src", "test", "resources", "trash").toString()
+        val trashDir = tempdir()
         val itemGroup = object : TestItemGroup() {
             override fun getRootDirFor(child: Item?): File {
-                return File(trashDir)
+                return trashDir
             }
         }
         val project = TestProject(itemGroup, "test")
@@ -98,6 +101,20 @@ class AllocateDatasetStepSpec : ShouldSpec({
                     RecordFormat.F
                 )
             )
+            allocateDatasetStepInst.setAlcUnit(AllocationUnit.CYL)
+            allocateDatasetStepInst.setStorClass("")
+            allocateDatasetStepInst.setStorClass("TEST")
+            allocateDatasetStepInst.setMgntClass("")
+            allocateDatasetStepInst.setMgntClass("TEST")
+            allocateDatasetStepInst.setDataClass("")
+            allocateDatasetStepInst.setDataClass("TEST")
+            allocateDatasetStepInst.setVolser("")
+            allocateDatasetStepInst.setVolser("TEST")
+            allocateDatasetStepInst.setUnit("")
+            allocateDatasetStepInst.setUnit("TEST")
+            allocateDatasetStepInst.setLrecl(3120)
+            allocateDatasetStepInst.setBlkSize(3120)
+            allocateDatasetStepInst.setDsnType(DsnameType.BASIC)
             allocateDatasetStepInst.perform(
                 build,
                 launcher,
