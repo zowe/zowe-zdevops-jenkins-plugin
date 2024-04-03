@@ -1,4 +1,3 @@
-# mvn hpi:run
 work
 
 target
@@ -6,6 +5,7 @@ target
 .vscode
 .gradle/
 build/
+/*.iml
 
 .mvn/wrapper/*
 !.mvn/wrapper/maven-wrapper.properties
