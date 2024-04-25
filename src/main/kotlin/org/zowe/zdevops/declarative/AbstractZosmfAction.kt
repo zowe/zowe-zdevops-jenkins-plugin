@@ -23,6 +23,7 @@ import jenkins.tasks.SimpleBuildStep
 import org.zowe.kotlinsdk.zowe.client.sdk.core.ZOSConnection
 import org.zowe.zdevops.Messages
 import org.zowe.zdevops.config.ZOSConnectionList
+import org.zowe.zdevops.utils.validateConnection
 import java.io.PrintWriter
 import java.io.StringWriter
 import java.net.URL
@@ -50,6 +51,9 @@ abstract class AbstractZosmfAction : Builder(), SimpleBuildStep {
     val zoweConnection = ZOSConnection(
       connURL.host, connURL.port.toString(), connection.username, connection.password, connURL.protocol
     )
+
+    validateConnection(zoweConnection)
+
     runCatching {
       perform(run, workspace, env, launcher, listener, zoweConnection)
     }.onFailure {
