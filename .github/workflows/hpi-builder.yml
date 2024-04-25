@@ -1,6 +1,6 @@
 name: Jenkins plugin .hpi build
 
-# Workflow triggers: whenever code is pushed to the main branch or a pull request is opened against it
+# This workflow will build an executable Jenkins plugin in .hpi format for further manual installation in Jenkins
 
 on: [push, workflow_dispatch]
 
@@ -14,20 +14,9 @@ jobs:
       - name: Checkout Jenkins plugin code
         uses: actions/checkout@v4
 
-      - name: Setup of environment
-        uses: ./.github/setup
-
       - name: Check repository content
         shell: bash
         run: pwd && ls -la
-
-      - name: Maven wrapper
-        shell: bash
-        run: mvn wrapper:wrapper
-
-      - name: Test run
-        shell: bash
-        run: ./mvnw clean verify
 
       - name: Set up Java
         uses: actions/setup-java@v4
@@ -37,7 +26,7 @@ jobs:
 
       - name: Build Jenkins Plugin into .hpi
         shell: bash
-        run: ./mvnw clean compile hpi:hpi  # Build the plugin using Maven
+        run: mvn clean package  # Build the plugin using Maven
 
       - name: Verify content of target folder
         shell: bash
@@ -47,4 +36,4 @@ jobs:
         uses: actions/upload-artifact@v4
         with:
           name: Zowe zDevOps plugin
-          path: ./target/zdevops.hpi
+          path: target/*.hpi
