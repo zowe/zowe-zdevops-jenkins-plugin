@@ -4,7 +4,7 @@
     <parent>
         <groupId>org.jenkins-ci.plugins</groupId>
         <artifactId>plugin</artifactId>
-        <version>4.78</version>
+        <version>4.78</version> <!-- See https://github.com/jenkinsci/plugin-pom/releases for available versions-->
         <relativePath />
     </parent>
 
@@ -19,9 +19,9 @@
 
 
     <properties>
-        <revision>0.2.0-</revision>
+        <revision>0.2.0</revision>
         <changelist>-SNAPSHOT</changelist>
-        <jenkins.version>2.375.1</jenkins.version>
+        <jenkins.version>2.387.3</jenkins.version>
         <java.version>11</java.version>
         <kotlin.version>1.8.21</kotlin.version>
         <kotlin.compiler.incremental>true</kotlin.compiler.incremental>
@@ -326,35 +326,15 @@
         </dependency>
 
         <dependency>
-            <groupId>org.jenkins-ci.plugins</groupId>
-            <artifactId>credentials</artifactId>
-        </dependency>
-
-        <dependency>
-            <groupId>org.jenkins-ci.plugins.workflow</groupId>
-            <artifactId>workflow-step-api</artifactId>
-        </dependency>
-
-        <dependency>
             <groupId>com.google.code.gson</groupId>
             <artifactId>gson</artifactId>
             <version>2.10.1</version>
         </dependency>
 
         <dependency>
-            <groupId>org.jenkins-ci.plugins</groupId>
-            <artifactId>script-security</artifactId>
-        </dependency>
-
-        <dependency>
             <groupId>org.apache.commons</groupId>
             <artifactId>commons-lang3</artifactId>
             <version>3.12.0</version>
-        </dependency>
-
-        <dependency>
-            <groupId>org.jenkins-ci</groupId>
-            <artifactId>annotation-indexer</artifactId>
         </dependency>
 
         <dependency>
@@ -403,6 +383,28 @@
             <artifactId>okhttp-tls</artifactId>
             <version>${okhttp3.version}</version>
             <scope>test</scope>
+        </dependency>
+
+        <!-- Jenkins plug-ins -->
+
+        <dependency>
+            <groupId>org.jenkins-ci</groupId>
+            <artifactId>annotation-indexer</artifactId>
+        </dependency>
+
+        <dependency>
+            <groupId>org.jenkins-ci.plugins</groupId>
+            <artifactId>script-security</artifactId>
+        </dependency>
+
+        <dependency>
+            <groupId>org.jenkins-ci.plugins</groupId>
+            <artifactId>credentials</artifactId>
+        </dependency>
+
+        <dependency>
+            <groupId>org.jenkins-ci.plugins.workflow</groupId>
+            <artifactId>workflow-step-api</artifactId>
         </dependency>
 
     </dependencies>
