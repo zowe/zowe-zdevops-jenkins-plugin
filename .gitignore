@@ -7,7 +7,5 @@ target
 build/
 /*.iml
 
-.mvn/wrapper/*
-!.mvn/wrapper/maven-wrapper.properties
 
 src/test/resources/trash/
