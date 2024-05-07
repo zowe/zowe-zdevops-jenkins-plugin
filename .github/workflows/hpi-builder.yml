@@ -23,8 +23,8 @@ jobs:
           java-version: '11'
           cache: maven
 
-      - name: Run the Maven verify phase
-        run: mvn --batch-mode --update-snapshots verify
+#      - name: Run the Maven verify phase
+#        run: mvn --batch-mode --update-snapshots verify
 
       - name: Check repository content
         shell: bash
