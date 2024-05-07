@@ -93,7 +93,7 @@ stage ("stage-name") {
 
 For debugging purposes run following Maven command from plugin project directory:
 
-```mvn hpi:run```
+```./mvnw hpi:run```
 
 Or by ```mvnDebug hpi:run``` - this will copy all the dependencies down (rather than in your jenkins install) and run it in place.
 
@@ -101,8 +101,14 @@ By default, the debugging instance is then available at [http://localhost:8080/j
 
 In order to launch Jenkins on a different port than 8080 use this system property:
 
-```mvn hpi:run -Djetty.port=8090```
+```./mvnw hpi:run -Djetty.port=8090```
 
 Changing the default context path can be achieved by setting this system property:
 
-```mvn hpi:run -Dhpi.prefix=/debug```
+```./mvnw hpi:run -Dhpi.prefix=/debug```
+
+## How to run unit-tests with JaCoCo report
+
+```./mvnw clean verify```
+
+The results are available under `target/site/jacoco/index.html`
