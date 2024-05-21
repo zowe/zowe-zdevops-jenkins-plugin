@@ -32,7 +32,7 @@ jobs:
 
       - name: Build Jenkins Plugin into .hpi
         shell: bash
-        run: ./mvnw clean package
+        run: chmod +x mvnw && ./mvnw clean package
 
       - name: Verify content of target folder
         shell: bash
