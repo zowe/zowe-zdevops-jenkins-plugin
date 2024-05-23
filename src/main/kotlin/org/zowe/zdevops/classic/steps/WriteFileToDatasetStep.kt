@@ -85,7 +85,7 @@ constructor(
         val file = when (fileOption) {
             DescriptorImpl().localFileOption -> localFilePath?.let { File(it) }
             DescriptorImpl().workspaceFileOption ->  {
-                val fileWorkspacePath = workspace?.remote + '\\' + workspacePath
+                val fileWorkspacePath = workspace?.remote + File.separator + workspacePath
                 File(fileWorkspacePath)
             }
             else        -> throw AbortException(Messages.zdevops_classic_write_options_invalid())
