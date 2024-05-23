@@ -49,7 +49,6 @@ class WriteFileToDatasetStepSpec : ShouldSpec({
         val zosConnection = ZOSConnection(mockServer.hostName, mockServer.port.toString(), "test", "test", "https")
         val rootDir = Paths.get("").toAbsolutePath().toString()
         val trashDir = tempdir()
-        val mockDir = Paths.get(rootDir, "src", "test", "resources", "mock").toString()
         val itemGroup = object : TestItemGroup() {
             override fun getRootDirFor(child: Item?): File {
                 return trashDir
@@ -98,7 +97,7 @@ class WriteFileToDatasetStepSpec : ShouldSpec({
             val writeFileToDatasetDecl = spyk(
                 WriteFileToDatasetStep("test", "TEST.IJMP.DATASET1", "workspace")
             )
-            writeFileToDatasetDecl.setLocalFilePath(mockDir + "/test_file.txt")
+            writeFileToDatasetDecl.setWorkspacePath("test_file.txt")
             writeFileToDatasetDecl.perform(
                 build,
                 launcher,

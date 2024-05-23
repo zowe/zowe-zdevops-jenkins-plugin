@@ -50,7 +50,6 @@ class WriteFileToFileStepSpec : ShouldSpec({
         val zosConnection = ZOSConnection(mockServer.hostName, mockServer.port.toString(), "test", "test", "https")
         val rootDir = Paths.get("").toAbsolutePath().toString()
         val trashDir = tempdir()
-        val mockDir = Paths.get(rootDir, "src", "test", "resources", "mock").toString()
         val itemGroup = object : TestItemGroup() {
             override fun getRootDirFor(child: Item?): File {
                 return trashDir
@@ -99,7 +98,7 @@ class WriteFileToFileStepSpec : ShouldSpec({
             val writeFileToFileDecl = spyk(
                 WriteFileToFileStep("test", "/u/TEST/test.txt", false, "workspace")
             )
-            writeFileToFileDecl.setLocalFilePath(mockDir + "/test_file.txt")
+            writeFileToFileDecl.setWorkspacePath("test_file.txt")
             writeFileToFileDecl.perform(
                 build,
                 launcher,
