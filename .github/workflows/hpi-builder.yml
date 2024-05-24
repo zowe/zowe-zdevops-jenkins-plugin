@@ -61,4 +61,5 @@ jobs:
           cache: maven
 
       - name: Run Unit Tests with Maven
-        run: ./mvnw test
+        shell: bash
+        run: chmod +x mvnw && ./mvnw test
