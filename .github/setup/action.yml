@@ -19,10 +19,3 @@ runs:
       with:
         distribution: 'zulu'
         java-version: ${{ inputs.jdkVersion }}
-
-    - name: Set up Maven Action
-      uses: s4u/setup-maven-action@v1.2.1
-      with:
-        java-version: ${{ inputs.jdkVersion }}
-        maven-version: ${{ inputs.mavenVersion }}
-
