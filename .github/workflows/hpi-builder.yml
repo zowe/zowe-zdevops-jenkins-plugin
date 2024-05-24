@@ -14,7 +14,7 @@ jobs:
 
     steps:
       - name: Checkout Jenkins plugin code
-        uses: actions/checkout@v3
+        uses: actions/checkout@v4
 
       - name: Set up Java
         uses: actions/setup-java@v4
@@ -22,10 +22,6 @@ jobs:
           distribution: 'temurin'
           java-version: '11'
           cache: maven
-
-      - name: Check repository content
-        shell: bash
-        run: pwd && ls -la
 
       - name: Build Jenkins Plugin into .hpi
         shell: bash
@@ -38,7 +34,7 @@ jobs:
       - name: Archive the Build Output
         uses: actions/upload-artifact@v4
         with:
-          name: zowe-zdevops
+          name: zowe-zdevops-hpi
           path: target/*.hpi
           compression-level: 0 # no compression
 
