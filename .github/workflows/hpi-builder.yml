@@ -40,9 +40,8 @@ jobs:
         with:
           name: zowe-zdevops
           path: target/*.hpi
+          compression-level: 0 # no compression
 
-      - name: Unzip archive
-        run: unzip target/*.hpi
 
   test:
 
