@@ -25,7 +25,7 @@ jobs:
 
       - name: Build Jenkins Plugin into .hpi
         shell: bash
-        run: chmod +x mvnw && ./mvnw clean package
+        run: ./mvnw clean package
 
       - name: Verify content of target folder
         shell: bash
@@ -57,4 +57,4 @@ jobs:
 
       - name: Run Unit Tests with Maven
         shell: bash
-        run: chmod +x mvnw && ./mvnw test
+        run: ./mvnw test
