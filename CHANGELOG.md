@@ -52,5 +52,5 @@ All notable changes to the Zowe zDevOps Jenkins Plugin will be documented in thi
 
 ### Bugfixes
 
-* Bugfix: Refactored packages and imports with io.jenkins.plugins  ([bf51f0b9](https://github.com/jenkinsci/zdevops-plugin/commit/bf51f0b9)
+* Bugfix: Refactored packages and imports with io.jenkins.plugins  ([bf51f0b9](https://github.com/jenkinsci/zdevops-plugin/commit/bf51f0b9))
 * Bugfix: Dependency fixes for later 0.1.0 release ([3d728f39](https://github.com/jenkinsci/zdevops-plugin/commit/3d728f39))
