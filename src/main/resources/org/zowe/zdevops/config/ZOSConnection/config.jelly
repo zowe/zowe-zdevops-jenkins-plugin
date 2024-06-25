@@ -7,7 +7,7 @@
 	<form:entry field="name" title="${%zdevops.config.ZOSConnection.name.title}">
 		<form:textbox/>
 	</form:entry>
-	<form:entry field="url" title="${%zdevops.config.ZOSConnection.url.title}">
+	<form:entry field="url" title="${%zdevops.config.ZOSConnection.url.title}" description="Enter a z/OS URL in the format https://url:port">
         <form:textbox/>
     </form:entry>
     <form:entry field="credentialsId" title="${%zdevops.config.ZOSConnection.credentialsId.title}">
