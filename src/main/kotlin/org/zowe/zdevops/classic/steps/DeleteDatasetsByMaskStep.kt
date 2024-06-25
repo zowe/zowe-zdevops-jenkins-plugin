@@ -31,7 +31,7 @@ class DeleteDatasetsByMaskStep
 constructor(
     connectionName: String,
     val dsnMask: String,
-    val failOnNotExist: Boolean,
+    val failOnNotExist: Boolean = false,
 ) : AbstractBuildStep(connectionName) {
 
     override fun perform(

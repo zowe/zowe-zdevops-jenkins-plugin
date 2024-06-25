@@ -38,7 +38,7 @@ constructor(
     connectionName: String,
     val dsn: String,
     val member: String?,
-    val failOnNotExist: Boolean ,
+    val failOnNotExist: Boolean = false ,
 ) : AbstractBuildStep(connectionName) {
 
     override fun perform(
