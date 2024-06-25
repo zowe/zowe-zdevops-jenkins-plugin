@@ -57,8 +57,8 @@ fun allocateDataset(listener: TaskListener,
                     dataClass: String?,
                     avgBlk: Int?,
                     dsnType: DsnameType?,
-                    dsModel: String?
-
+                    dsModel: String?,
+                    failOnExist: Boolean,
 ) {
     listener.logger.println(Messages.zdevops_declarative_DSN_allocating(dsn, zosConnection.host, zosConnection.zosmfPort))
     val alcParms = CreateDataset(
@@ -79,6 +79,14 @@ fun allocateDataset(listener: TaskListener,
         dsnType,
         dsModel
     )
-    ZosDsn(zosConnection).createDsn(dsn, alcParms)
-    listener.logger.println(Messages.zdevops_declarative_DSN_allocated_success(dsn))
+    try {
+        ZosDsn(zosConnection).createDsn(dsn, alcParms)
+        listener.logger.println(Messages.zdevops_declarative_DSN_allocated_success(dsn))
+    } catch (allocateDsEx: Exception) {
+        listener.logger.println("Dataset allocation failed. Reason: $allocateDsEx")
+        if(failOnExist) {
+            throw allocateDsEx
+        }
+        listener.logger.println("The `failOnExist` option is set to false. Continuing with execution.")
+    }
 }

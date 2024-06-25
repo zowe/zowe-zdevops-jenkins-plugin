@@ -38,6 +38,7 @@ constructor(
     connectionName: String,
     val dsn: String,
     val member: String?,
+    val failOnNotExist: Boolean ,
 ) : AbstractBuildStep(connectionName) {
 
     override fun perform(
@@ -46,7 +47,7 @@ constructor(
         listener: BuildListener,
         zosConnection: ZOSConnection
     ) {
-        deleteDatasetOrMember(dsn, member, zosConnection, listener)
+        deleteDatasetOrMember(dsn, member, zosConnection, listener, failOnNotExist)
     }
 
     @Extension

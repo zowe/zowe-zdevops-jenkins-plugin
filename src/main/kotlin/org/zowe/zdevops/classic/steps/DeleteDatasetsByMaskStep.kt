@@ -31,6 +31,7 @@ class DeleteDatasetsByMaskStep
 constructor(
     connectionName: String,
     val dsnMask: String,
+    val failOnNotExist: Boolean,
 ) : AbstractBuildStep(connectionName) {
 
     override fun perform(
@@ -39,7 +40,7 @@ constructor(
         listener: BuildListener,
         zosConnection: ZOSConnection
     ) {
-        deleteDatasetsByMask(dsnMask, zosConnection, listener)
+        deleteDatasetsByMask(dsnMask, zosConnection, listener, failOnNotExist)
     }
 
     @Extension
