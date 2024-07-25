@@ -22,7 +22,6 @@ import org.zowe.zdevops.Messages
 import org.zowe.zdevops.classic.AbstractBuildStep
 import org.zowe.zdevops.logic.deleteDatasetOrMember
 import org.zowe.zdevops.utils.validateDatasetName
-import org.zowe.zdevops.utils.validateFieldIsNotEmpty
 import org.zowe.zdevops.utils.validateMemberName
 
 class DeleteDatasetStep
@@ -68,10 +67,14 @@ constructor(
          * Checks if the member name is valid
          *
          * @param member The dataset member name
-         * @return FormValidation.ok() if the member name is valid, or an error message otherwise
+         * @return FormValidation.ok() if either the member name is valid or is not provided, or an error message otherwise
          */
         fun doCheckMember(@QueryParameter member: String): FormValidation? {
-            return validateMemberName(member)?: validateFieldIsNotEmpty(member)
+            return if (member.isNotBlank()) {
+                validateMemberName(member)
+            } else {
+                FormValidation.ok()
+            }
         }
     }
 }
