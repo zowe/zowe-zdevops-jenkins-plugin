@@ -37,12 +37,12 @@ fun performTsoCommand(
     command: String,
     ) {
     listener.logger.println(Messages.zdevops_issue_TSO_command(command))
-    runCatching {
+    try {
         val tsoCommandResponse = IssueTso(zosConnection).issueTsoCommand(acct, command, StartTsoParams(), failOnPrompt = true)
         listener.logger.println(tsoCommandResponse.commandResponses)
-    }.onFailure {
-        listener.logger.println(it)
-        throw AbortException(Messages.zdevops_TSO_command_fail())
+    } catch (ex: Exception) {
+        listener.logger.println(Messages.zdevops_TSO_command_fail())
+        throw ex
     }
     listener.logger.println(Messages.zdevops_TSO_command_success())
 }
