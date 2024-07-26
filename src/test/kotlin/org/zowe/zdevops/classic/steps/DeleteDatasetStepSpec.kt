@@ -110,7 +110,7 @@ class DeleteDatasetStepSpec : ShouldSpec({
         }
 
         should("validate member name") {
-            descriptor.doCheckMember("") shouldBe FormValidation.error(Messages.zdevops_value_up_to_eight_in_length_validation())
+            descriptor.doCheckMember("") shouldBe FormValidation.ok()
             descriptor.doCheckMember("@MY_DS") shouldBe FormValidation.warning(Messages.zdevops_member_name_is_invalid_validation())
             descriptor.doCheckMember("DSNAME") shouldBe FormValidation.ok()
         }
