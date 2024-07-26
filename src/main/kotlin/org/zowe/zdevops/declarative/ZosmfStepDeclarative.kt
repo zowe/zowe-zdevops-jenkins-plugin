@@ -13,17 +13,24 @@ package org.zowe.zdevops.declarative
 import hudson.EnvVars
 import hudson.Extension
 import hudson.FilePath
-import hudson.model.*
 import hudson.model.Run
+import hudson.model.TaskListener
 import org.jenkinsci.plugins.workflow.steps.Step
 import org.jenkinsci.plugins.workflow.steps.StepContext
 import org.jenkinsci.plugins.workflow.steps.StepDescriptor
 import org.jenkinsci.plugins.workflow.steps.StepExecution
 import org.kohsuke.stapler.DataBoundConstructor
+import org.zowe.zdevops.utils.getZoweZosConnection
+import org.zowe.zdevops.utils.validateConnection
 
 
 class ZosmfStepDeclarative @DataBoundConstructor constructor(private val connectionName: String) : Step() {
   override fun start(context: StepContext): StepExecution {
+    val listener: TaskListener? = context.get(TaskListener::class.java)
+    val zosConnection =  getZoweZosConnection(connectionName, listener)
+
+    validateConnection(zosConnection)
+
     return ZosmfExecution(connectionName, context)
   }
 
