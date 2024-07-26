@@ -42,7 +42,7 @@ constructor(
         "${jobUrl}ws/${jobName}.${jobId}/*view*/"
       }
       val jobResult = submitJobSync(jobName, zosConnection, listener, workspace, build.getEnvironment(listener)["JOB_URL"], linkBuilder)
-      if (checkRC && !jobResult.returnedCode.equals("CC 0000")) {
+      if (checkRC && !jobResult.equals("CC 0000")) {
         throw AbortException("Job RC code is not 0000")
       }
     } else {
