@@ -24,6 +24,7 @@ import org.kohsuke.stapler.QueryParameter
 import org.zowe.kotlinsdk.zowe.client.sdk.core.ZOSConnection
 import org.zowe.zdevops.Messages
 import org.zowe.zdevops.config.ZOSConnectionList
+import org.zowe.zdevops.utils.validateConnection
 import java.io.IOException
 import java.io.PrintWriter
 import java.io.StringWriter
@@ -70,6 +71,8 @@ abstract class AbstractBuildStep(val connectionName: String) : Builder(), Simple
         val zosConnection = ZOSConnection(
             connURL.host, connURL.port.toString(), connection.username, connection.password, connURL.protocol
         )
+
+        validateConnection(zosConnection)
 
         perform(build, launcher, listener, zosConnection)
         return true
