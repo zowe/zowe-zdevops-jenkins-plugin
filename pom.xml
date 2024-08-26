@@ -28,7 +28,7 @@
         <sezpoz.version>1.13</sezpoz.version>
         <okhttp3.version>4.10.0</okhttp3.version>
         <zowekotlinsdk.version>0.5.0-rc.1</zowekotlinsdk.version>
-        <kotest.version>5.6.1</kotest.version>
+        <kotest.version>5.8.0</kotest.version>
         <kotlin.code.style>official</kotlin.code.style>
         <kotlin.compiler.jvmTarget>11</kotlin.compiler.jvmTarget>
         <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
