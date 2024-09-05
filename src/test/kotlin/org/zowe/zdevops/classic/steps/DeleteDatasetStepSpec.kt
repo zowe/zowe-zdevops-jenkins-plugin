@@ -99,7 +99,51 @@ class DeleteDatasetStepSpec : ShouldSpec({
             assertSoftly { isDeletingDataset shouldBe true }
             assertSoftly { isSuccessfullyDeleted shouldBe true }
         }
+
+        should("succeed as there is no such dataset, but failOnNotExist is set to false") {
+            var isDeletingDataset = false
+            var isContinuingExecution = false
+            val taskListener = object : TestBuildListener() {
+                override fun getLogger(): PrintStream {
+                    val logger = mockk<PrintStream>()
+                    every {
+                        logger.println(any<String>())
+                    } answers {
+                        if (firstArg<String>().contains("Deleting dataset")) {
+                            isDeletingDataset = true
+                        } else if (firstArg<String>().contains("Dataset deletion failed, but the `failOnNotExist` option is set to false.")
+                            || firstArg<String>().contains("Reason")) {
+                            isContinuingExecution = true
+                        } else {
+                            fail("Unexpected logger message: ${firstArg<String>()}")
+                        }
+                    }
+                    return logger
+                }
+            }
+            val launcher = TestLauncher(taskListener, virtualChannel)
+
+            responseDispatcher.injectEndpoint(
+                this.testCase.name.testName,
+                { it?.requestLine?.contains(Regex("DELETE /zosmf/restfiles/ds/.* HTTP/.*")) ?: false },
+                { MockResponse().setBody("{}").setResponseCode(404) }
+            )
+
+            val deleteDatasetStep = spyk(
+                DeleteDatasetStep("test", "TEST.IJMP.DATASET1", member = null, failOnNotExist = false)
+            )
+            deleteDatasetStep.perform(
+                build,
+                launcher,
+                taskListener,
+                zosConnection
+            )
+
+            assertSoftly { isDeletingDataset shouldBe true }
+            assertSoftly { isContinuingExecution shouldBe true }
+        }
     }
+
 
     val descriptor = DeleteDatasetStep.DescriptorImpl()
     context("classic/steps module: DeleteDatasetStep.DescriptorImpl") {
