@@ -8,7 +8,7 @@
  * Copyright IBA Group 2022
  */
 
-package org.zowe.zdevops.config;
+package org.zowe.zdevops.config
 
 import com.cloudbees.plugins.credentials.CredentialsMatchers
 import com.cloudbees.plugins.credentials.CredentialsProvider
