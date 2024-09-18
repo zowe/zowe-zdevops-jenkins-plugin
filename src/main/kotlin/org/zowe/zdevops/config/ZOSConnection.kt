@@ -16,10 +16,6 @@ import com.cloudbees.plugins.credentials.common.StandardCredentials
 import com.cloudbees.plugins.credentials.common.StandardListBoxModel
 import com.cloudbees.plugins.credentials.common.StandardUsernamePasswordCredentials
 import com.cloudbees.plugins.credentials.domains.URIRequirementBuilder
-import org.zowe.kotlinsdk.zowe.client.sdk.zosfiles.ZosDsnList
-import org.zowe.kotlinsdk.zowe.client.sdk.zosfiles.input.ListParams
-import org.zowe.zdevops.Messages
-import org.zowe.zdevops.declarative.jobs.zMessages
 import hudson.Extension
 import hudson.model.AbstractDescribableImpl
 import hudson.model.Descriptor
@@ -32,6 +28,9 @@ import net.sf.json.JSONObject
 import org.kohsuke.stapler.DataBoundConstructor
 import org.kohsuke.stapler.QueryParameter
 import org.kohsuke.stapler.StaplerRequest
+import org.zowe.zdevops.Messages
+import org.zowe.zdevops.declarative.jobs.zMessages
+import org.zowe.zdevops.utils.getTestDatasetList
 import java.io.IOException
 import java.io.ObjectInputStream
 import java.io.ObjectOutputStream
@@ -119,9 +118,9 @@ constructor(
         val testConnection = org.zowe.kotlinsdk.zowe.client.sdk.core.ZOSConnection(
           connURL.host, connURL.port.toString(), credentials.username, credentials.password.plainText, connURL.protocol
         )
-        ZosDsnList(testConnection).listDsn(zMessages.zdevops_config_ZOSConnection_validation_testDS(), ListParams())
+        getTestDatasetList(testConnection)
       }.onFailure {
-        return FormValidation.error(zMessages.zdevops_config_ZOSConnection_validation_error());
+        return FormValidation.error("${zMessages.zdevops_config_ZOSConnection_validation_error()}\n(${it.message})");
       }
       return FormValidation.ok(zMessages.zdevops_config_ZOSConnection_validation_success())
     }

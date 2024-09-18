@@ -1,6 +1,6 @@
 # Zowe zDevOps Jenkins plugin
 
-## About  the plugin
+## About the plugin
 The Zowe zDevOps Jenkins Plugin by [IBA Group](https://ibagroupit.com/?utm_campaign=IBA_W-Mainframe&utm_source=jenkins&utm_medium=referral&utm_content=description_zdevops) is an open-source, secure , and reliable agent-less Jenkins plugin that makes it possible to perform most of the actual tasks on the mainframe, managing it with a modern native mainframe zOSMF REST API and the capabilities of available zOSMF SDKs.
 
 ## Advantages
