@@ -29,22 +29,31 @@ private val successMessage: String = zMessages.zdevops_deleting_ds_success()
  * @param listener The task listener to log information and handle exceptions.
  * @throws AbortException If the mask is empty or no matching datasets are found.
  */
-fun deleteDatasetsByMask(mask: String, zosConnection: ZOSConnection, listener: TaskListener) {
+fun deleteDatasetsByMask(mask: String, zosConnection: ZOSConnection, listener: TaskListener, failOnNotExist: Boolean) {
     if (mask.isEmpty()) {
         throw AbortException(zMessages.zdevops_deleting_datasets_by_mask_but_mask_is_empty())
     }
     listener.logger.println(zMessages.zdevops_deleting_ds_by_mask(mask))
-    val dsnList = ZosDsnList(zosConnection).listDsn(mask, ListParams())
-    if (dsnList.items.isEmpty()) {
-        throw AbortException(zMessages.zdevops_deleting_ds_fail_no_matching_mask())
-    }
-    dsnList.items.forEach {
-        runMFTryCatchWrappedQuery(listener) {
-            listener.logger.println(zMessages.zdevops_deleting_ds(it.name, zosConnection.host, zosConnection.zosmfPort))
-            ZosDsn(zosConnection).deleteDsn(it.name)
+    try {
+        val dsnList = ZosDsnList(zosConnection).listDsn(mask, ListParams())
+        if (dsnList.items.isEmpty()) {
+            throw AbortException(zMessages.zdevops_deleting_ds_fail_no_matching_mask())
         }
+        dsnList.items.forEach {
+            runMFTryCatchWrappedQuery(listener) {
+                listener.logger.println(zMessages.zdevops_deleting_ds(it.name, zosConnection.host, zosConnection.zosmfPort))
+                ZosDsn(zosConnection).deleteDsn(it.name)
+            }
+        }
+        listener.logger.println(successMessage)
+    } catch (doesNotExistEx: Exception) {
+        if(failOnNotExist) {
+            throw doesNotExistEx
+        }
+        listener.logger.println("Reason: $doesNotExistEx")
+        // TODO I wanna have the dataset name here - it's inside exception message?
+        listener.logger.println("Dataset deletion failed, but the `failOnNotExist` option is set to false. Continuing with execution.")
     }
-    listener.logger.println(successMessage)
 }
 
 /**
@@ -56,22 +65,28 @@ fun deleteDatasetsByMask(mask: String, zosConnection: ZOSConnection, listener: T
  * @param listener The task listener to log information and handle exceptions.
  * @throws AbortException If the dataset name is empty or the member name is invalid.
  */
-fun deleteDatasetOrMember(dsn: String, member: String?, zosConnection: ZOSConnection, listener: TaskListener) {
+fun deleteDatasetOrMember(dsn: String, member: String?, zosConnection: ZOSConnection, listener: TaskListener, failOnNotExist: Boolean) {
     if (dsn.isEmpty()) {
         throw AbortException(zMessages.zdevops_deleting_ds_fail_dsn_param_empty())
     }
     val logMessage = if (!member.isNullOrEmpty()) zMessages.zdevops_deleting_ds_member(member, dsn, zosConnection.host, zosConnection.zosmfPort)
                      else zMessages.zdevops_deleting_ds(dsn, zosConnection.host, zosConnection.zosmfPort)
     listener.logger.println(logMessage)
-    runMFTryCatchWrappedQuery(listener) {
+    try {
         if (!member.isNullOrEmpty()) {
             isMemberNameValid(member)
             ZosDsn(zosConnection).deleteDsn(dsn, member)
         } else {
             ZosDsn(zosConnection).deleteDsn(dsn)
         }
+        listener.logger.println(successMessage)
+    } catch (doesNotExistEx: Exception) {
+        if(failOnNotExist) {
+            throw doesNotExistEx
+        }
+        listener.logger.println("Reason: $doesNotExistEx")
+        listener.logger.println("Dataset deletion failed, but the `failOnNotExist` option is set to false. Continuing with execution.")
     }
-    listener.logger.println(successMessage)
 }
 
 /**

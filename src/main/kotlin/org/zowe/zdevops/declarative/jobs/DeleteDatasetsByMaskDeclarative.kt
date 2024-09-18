@@ -56,9 +56,13 @@ class DeleteDatasetsByMaskDeclarative @DataBoundConstructor constructor(
 ) : AbstractZosmfAction() {
 
     private var mask: String = ""
+    private var failOnNotExist: Boolean = false
 
     @DataBoundSetter
     fun setMask(mask: String) { this.mask = mask }
+
+    @DataBoundSetter
+    fun setFailOnNotExist(failOnNotExist: Boolean) { this.failOnNotExist = failOnNotExist }
 
     override val exceptionMessage: String = zMessages.zdevops_deleting_ds_fail()
 
@@ -70,7 +74,7 @@ class DeleteDatasetsByMaskDeclarative @DataBoundConstructor constructor(
         listener: TaskListener,
         zosConnection: ZOSConnection
     ) {
-        deleteDatasetsByMask(mask, zosConnection,listener)
+        deleteDatasetsByMask(mask, zosConnection,listener, failOnNotExist)
     }
 
 

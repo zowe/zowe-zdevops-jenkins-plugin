@@ -55,6 +55,7 @@ constructor(
   val primary: Int = 1,
   var secondary: Int,
   var recFm: RecordFormat,
+  var failOnExist: Boolean = false,
 ) : AbstractBuildStep(connectionName){
 
   private var volser: String? = null
@@ -177,7 +178,8 @@ constructor(
       dataClass,
       avgBlk,
       dsnType,
-      dsModel
+      dsModel,
+      failOnExist,
     )
   }
 
