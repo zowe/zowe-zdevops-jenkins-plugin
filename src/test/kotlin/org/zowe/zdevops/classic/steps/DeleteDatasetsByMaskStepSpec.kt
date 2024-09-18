@@ -132,7 +132,7 @@ class DeleteDatasetsByMaskStepSpec : ShouldSpec({
             )
 
             val deleteDatasetDecl = spyk(
-                DeleteDatasetsByMaskStep("test", "TEST.IJMP.DATASET%.NONE")
+                DeleteDatasetsByMaskStep("test", "TEST.IJMP.DATASET%.NONE", failOnNotExist = true)
             )
             shouldThrow<AbortException> {
                 deleteDatasetDecl.perform(

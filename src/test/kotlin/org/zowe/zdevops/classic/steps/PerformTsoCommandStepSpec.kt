@@ -120,7 +120,7 @@ class PerformTsoCommandStepSpec : ShouldSpec({
             assertSoftly { isPreExecuteStage shouldBe true }
             assertSoftly { isCommandExecuted shouldBe true }
         }
-        should("fail SubmitJobStep operation") {
+        should("fail PerformTsoCommand operation") {
             var isPreExecuteStage = false
             var isExecuteCommandFailLogged = false
             val taskListener = object : TestBuildListener() {

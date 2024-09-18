@@ -12,4 +12,7 @@
     <form:entry field="member" title="${%zdevops.classic.member.title}">
         <form:textbox/>
     </form:entry>
+    <form:entry field="failOnNotExist" title="failOnNotExist?" description="If the dataset does not exists and the option is enabled, execution will halt.">
+        <form:checkbox/>
+    </form:entry>
 </jelly:jelly>

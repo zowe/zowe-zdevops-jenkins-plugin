@@ -14,6 +14,7 @@ import hudson.AbortException
 import hudson.model.TaskListener
 import org.zowe.kotlinsdk.zowe.client.sdk.core.ZOSConnection
 import org.zowe.kotlinsdk.zowe.client.sdk.zostso.IssueTso
+import org.zowe.kotlinsdk.zowe.client.sdk.zostso.input.StartTsoParams
 import org.zowe.zdevops.Messages
 
 /**
@@ -36,12 +37,12 @@ fun performTsoCommand(
     command: String,
     ) {
     listener.logger.println(Messages.zdevops_issue_TSO_command(command))
-    runCatching {
-        val tsoCommandResponse = IssueTso(zosConnection).issueTsoCommand(acct, command)
+    try {
+        val tsoCommandResponse = IssueTso(zosConnection).issueTsoCommand(acct, command, StartTsoParams(), failOnPrompt = true)
         listener.logger.println(tsoCommandResponse.commandResponses)
-    }.onFailure {
+    } catch (ex: Exception) {
         listener.logger.println(Messages.zdevops_TSO_command_fail())
-        throw AbortException(Messages.zdevops_TSO_command_fail())
+        throw ex
     }
     listener.logger.println(Messages.zdevops_TSO_command_success())
 }
