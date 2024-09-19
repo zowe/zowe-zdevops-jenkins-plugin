@@ -71,7 +71,7 @@ fun submitJobSync(
     workspacePath: FilePath,
     buildUrl: String?,
     linkBuilder: (String?, String, String) -> String
-): String? {
+): String {
     val submitJobRsp = submitJob(fileToSubmit, zosConnection, listener)
     listener.logger.println(Messages.zdevops_declarative_ZOSJobs_submitted_waiting())
 
@@ -103,5 +103,5 @@ fun submitJobSync(
         listener.logger.println(Messages.zdevops_no_spool_files(submitJobRsp.jobid))
     }
 
-    return finalResult?.returnedCode
+    return finalResult.returnedCode ?: throw AbortException("Couldn't get the job $jobId")
 }
