@@ -5,7 +5,6 @@
 <jelly:jelly xmlns:jelly="jelly:core" xmlns:form="/lib/form" xmlns:stapler="jelly:stapler">
 
     <jelly:set var="stepId" value="${descriptor.createStepId()}" />
-    <p>${stepId}</p>
 
     <form:entry field="connectionName" title="${%zdevops.classic.connection.title}">
 		<form:select/>
