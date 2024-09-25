@@ -23,11 +23,10 @@ import org.kohsuke.stapler.DataBoundConstructor
 import org.zowe.zdevops.utils.getZoweZosConnection
 import org.zowe.zdevops.utils.validateConnection
 
-
 class ZosmfStepDeclarative @DataBoundConstructor constructor(private val connectionName: String) : Step() {
   override fun start(context: StepContext): StepExecution {
     val listener: TaskListener? = context.get(TaskListener::class.java)
-    val zosConnection =  getZoweZosConnection(connectionName, listener)
+    val zosConnection = getZoweZosConnection(connectionName, listener)
 
     validateConnection(zosConnection)
 
