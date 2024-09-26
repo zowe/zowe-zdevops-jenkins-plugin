@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2022-2024 IBA Group.
+ * Copyright (c) 2023-2024 IBA Group.
  *
  * This program and the accompanying materials are made available under the terms of the
  * Eclipse Public License v2.0 which accompanies this distribution, and is available at
@@ -35,20 +35,20 @@ import org.zowe.zdevops.logic.performTsoCommand
 class PerformTsoCommandDeclarative
 @DataBoundConstructor
 constructor(
-    val acct: String,
-    val command: String,
+  val acct: String,
+  val command: String,
 ) : AbstractZosmfActionWithResult() {
 
-    override fun run(
-        workspace: FilePath,
-        listener: TaskListener,
-        envVars: EnvVars,
-        zoweZOSConnection: ZOSConnection
-    ): String {
-        return performTsoCommand(zoweZOSConnection, listener, acct, command)
-            ?: throw AbortException("TSO command execution returned an empty result")
-    }
+  override fun run(
+    workspace: FilePath,
+    listener: TaskListener,
+    envVars: EnvVars,
+    zoweZOSConnection: ZOSConnection
+  ): String {
+    return performTsoCommand(zoweZOSConnection, listener, acct, command)
+      ?: throw AbortException("TSO command execution returned an empty result")
+  }
 
-    @Extension
-    class DescriptorImpl : Companion.DefaultStepDescriptor(functionName = "performTsoCommandWithResult")
+  @Extension
+  class DescriptorImpl : Companion.DefaultStepDescriptor(functionName = "performTsoCommandWithResult")
 }
