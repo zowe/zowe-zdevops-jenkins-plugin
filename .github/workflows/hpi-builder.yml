@@ -22,6 +22,7 @@ jobs:
           distribution: 'temurin'
           java-version: '17'
           cache: maven
+          cache-dependency-path: '**/pom.xml' # Cache key based on the pom.xml fil
 
       - name: Build Jenkins Plugin into .hpi
         shell: bash
