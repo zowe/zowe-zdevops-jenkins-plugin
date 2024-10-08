@@ -13,6 +13,7 @@ package org.zowe.zdevops.logic
 import hudson.AbortException
 import hudson.model.TaskListener
 import org.zowe.kotlinsdk.zowe.client.sdk.core.ZOSConnection
+import org.zowe.kotlinsdk.zowe.client.sdk.zostso.IssueResponse
 import org.zowe.kotlinsdk.zowe.client.sdk.zostso.IssueTso
 import org.zowe.kotlinsdk.zowe.client.sdk.zostso.input.StartTsoParams
 import org.zowe.zdevops.Messages
@@ -26,7 +27,7 @@ import org.zowe.zdevops.Messages
  * @param listener The Jenkins build listener for logging and monitoring the execution.
  * @param acct The z/OS account number.
  * @param command The TSO command to be executed.
- *
+ * @return the command output.
  * @throws AbortException if the TSO command execution fails, with the error message indicating
  *                       the reason for the failure.
  */
@@ -35,14 +36,16 @@ fun performTsoCommand(
     listener: TaskListener,
     acct: String,
     command: String,
-    ) {
+    ): String? {
     listener.logger.println(Messages.zdevops_issue_TSO_command(command))
+    val tsoCommandResponse: IssueResponse
     try {
-        val tsoCommandResponse = IssueTso(zosConnection).issueTsoCommand(acct, command, StartTsoParams(), failOnPrompt = true)
+        tsoCommandResponse = IssueTso(zosConnection).issueTsoCommand(acct, command, StartTsoParams(), failOnPrompt = true)
         listener.logger.println(tsoCommandResponse.commandResponses)
     } catch (ex: Exception) {
         listener.logger.println(Messages.zdevops_TSO_command_fail())
         throw ex
     }
     listener.logger.println(Messages.zdevops_TSO_command_success())
+    return tsoCommandResponse.commandResponses
 }

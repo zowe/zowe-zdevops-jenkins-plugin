@@ -1,18 +1,21 @@
 /*
+ * Copyright (c) 2022-2024 IBA Group.
+ *
  * This program and the accompanying materials are made available under the terms of the
  * Eclipse Public License v2.0 which accompanies this distribution, and is available at
  * https://www.eclipse.org/legal/epl-v20.html
  *
  * SPDX-License-Identifier: EPL-2.0
  *
- * Copyright IBA Group 2022
+ * Contributors:
+ *   IBA Group
+ *   Zowe Community
  */
 
 package org.zowe.zdevops.declarative.jobs
 
 import hudson.EnvVars
 import hudson.FilePath
-import hudson.model.Item
 import io.kotest.assertions.assertSoftly
 import io.kotest.assertions.fail
 import io.kotest.core.spec.style.ShouldSpec
@@ -43,17 +46,9 @@ class SubmitJobSyncStepDeclarativeSpec : ShouldSpec({
   afterSpec {
     mockServerFactory.stopMockServer()
   }
-  context("declarative/jobs module: SubmitJobStep") {
-    val virtualChannel = TestVirtualChannel()
+  context("declarative/jobs module: SubmitJobStepSync") {
     val zosConnection = ZOSConnection(mockServer.hostName, mockServer.port.toString(), "test", "test", "https")
     val trashDir = tempdir()
-    val itemGroup = object : TestItemGroup() {
-      override fun getRootDirFor(child: Item?): File {
-        return trashDir
-      }
-    }
-    val job = TestJob(itemGroup, "test")
-    val run = TestRun(job)
     val trashDirWithInternal = Paths.get(trashDir.absolutePath, "test_name").toString()
     val workspace = FilePath(File(trashDirWithInternal))
     val env = EnvVars()
@@ -68,6 +63,7 @@ class SubmitJobSyncStepDeclarativeSpec : ShouldSpec({
       var isJobFinished = false
       var isDownloadingExecutionLog = false
       var isNoSpoolLogs = false
+      val jobFinishedWellRC = "CC 0000"
 
       val taskListener = object : TestBuildListener() {
         override fun getLogger(): PrintStream {
@@ -94,7 +90,6 @@ class SubmitJobSyncStepDeclarativeSpec : ShouldSpec({
           return logger
         }
       }
-      val launcher = TestLauncher(taskListener, virtualChannel)
 
       responseDispatcher.injectEndpoint(
         "${this.testCase.name.testName}_submitJob",
@@ -116,15 +111,10 @@ class SubmitJobSyncStepDeclarativeSpec : ShouldSpec({
       val submitJobSyncStepDeclInst = spyk(
         SubmitJobSyncStepDeclarative("test")
       )
-      submitJobSyncStepDeclInst.perform(
-        run,
-        workspace,
-        env,
-        launcher,
-        taskListener,
-        zosConnection
-      )
 
+      val jobRC = submitJobSyncStepDeclInst.run(workspace, taskListener, env, zosConnection)
+
+      assertSoftly { jobRC shouldBe jobFinishedWellRC }
       assertSoftly { isJobSubmitting shouldBe true }
       assertSoftly { isJobSubmitted shouldBe true }
       assertSoftly { isWaitingJobFinish shouldBe true }
@@ -165,7 +155,6 @@ class SubmitJobSyncStepDeclarativeSpec : ShouldSpec({
           return logger
         }
       }
-      val launcher = TestLauncher(taskListener, virtualChannel)
 
       responseDispatcher.injectEndpoint(
         "${this.testCase.name.testName}_submitJob",
@@ -193,14 +182,7 @@ class SubmitJobSyncStepDeclarativeSpec : ShouldSpec({
       val submitJobSyncStepDeclInst = spyk(
         SubmitJobSyncStepDeclarative("test")
       )
-      submitJobSyncStepDeclInst.perform(
-        run,
-        workspace,
-        env,
-        launcher,
-        taskListener,
-        zosConnection
-      )
+      submitJobSyncStepDeclInst.run(workspace, taskListener, env, zosConnection)
 
       assertSoftly { isJobSubmitting shouldBe true }
       assertSoftly { isJobSubmitted shouldBe true }
