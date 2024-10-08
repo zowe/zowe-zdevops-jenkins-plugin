@@ -7,7 +7,7 @@
 		<form:select/>
 	</form:entry>
     <form:entry field="acct" title="${%zdevops.classic.acct.title}">
-        <form:textbox/>
+        <form:textbox default="ACCT#"/>
     </form:entry>
     <form:entry field="command" title="${%zdevops.classic.command.title}">
         <form:textbox/>
