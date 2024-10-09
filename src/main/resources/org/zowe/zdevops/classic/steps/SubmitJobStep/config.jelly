@@ -4,8 +4,14 @@
 
 <jelly:jelly xmlns:jelly="jelly:core" xmlns:form="/lib/form" xmlns:stapler="jelly:stapler">
 
+    <style>
+        .SubmitJob-sub-property {
+            margin-top: -10px;
+            margin-left: 30px;
+        }
+    </style>
+
     <jelly:set var="stepId" value="${descriptor.createStepId()}" />
-    <p>${stepId}</p>
 
     <form:entry field="connectionName" title="${%zdevops.classic.connection.title}">
 		<form:select/>
@@ -16,7 +22,7 @@
     <form:entry title="Wait till end and get logs" field="sync">
         <form:checkbox id="${stepId}_sync"  onclick="checkSync${stepId}();"/>
     </form:entry>
-    <form:entry  title="Fail if RC is not 0000" field="checkRC">
+    <form:entry  title="Fail if RC is not 0000" field="checkRC" class="SubmitJob-sub-property">
         <form:checkbox id="${stepId}_checkRC" onclick="checkSync${stepId}();"/>
     </form:entry>
 
@@ -24,12 +30,13 @@
         function checkSync${stepId}() {
             var sync = document.getElementById('${stepId}_sync');
             var checkRC = document.getElementById('${stepId}_checkRC');
-
             checkRC.readonly = sync.checked;
-            console.log("it works");
+            checkRC.removeAttribute('disabled');
+
             if (!sync.checked &amp;&amp; checkRC.checked) {
                 checkRC.checked = false;
                 checkRC.readonly = true;
+                checkRC.disabled = "disabled";
             }
         }
     </script>
