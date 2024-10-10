@@ -70,7 +70,8 @@ constructor(
         zosConnection: ZOSConnection
     ) {
         val workspace = build.executor?.currentWorkspace!!
-        downloadDSOrDSMemberByType(dsn, vol, returnEtag, listener, zosConnection, workspace)
+        val jenkinsJobUrl = build.getEnvironment(listener)["JOB_URL"]
+        downloadDSOrDSMemberByType(dsn, vol, returnEtag, listener, zosConnection, workspace, jenkinsJobUrl)
     }
 
 

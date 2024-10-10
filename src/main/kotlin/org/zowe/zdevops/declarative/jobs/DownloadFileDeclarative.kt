@@ -10,7 +10,10 @@
 
 package org.zowe.zdevops.declarative.jobs
 
-import hudson.*
+import hudson.EnvVars
+import hudson.Extension
+import hudson.FilePath
+import hudson.Launcher
 import hudson.model.Run
 import hudson.model.TaskListener
 import org.jenkinsci.Symbol
@@ -47,7 +50,8 @@ class DownloadFileDeclarative @DataBoundConstructor constructor(val dsn: String)
         zosConnection: ZOSConnection
     ) {
         val workspacePath = FilePath(null, workspace.remote.replace(workspace.name,""))
-        downloadDSOrDSMemberByType(dsn, vol, returnEtag, listener, zosConnection, workspacePath)
+        val jenkinsJobUrl = env["BUILD_URL"] + "/execution/node/3/"
+        downloadDSOrDSMemberByType(dsn, vol, returnEtag, listener, zosConnection, workspacePath, jenkinsJobUrl)
     }
 
 
