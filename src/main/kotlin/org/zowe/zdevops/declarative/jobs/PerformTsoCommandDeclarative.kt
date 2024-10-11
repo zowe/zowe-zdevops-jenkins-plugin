@@ -50,5 +50,5 @@ constructor(
   }
 
   @Extension
-  class DescriptorImpl : Companion.DefaultStepDescriptor(functionName = "performTsoCommandWithResult")
+  class DescriptorImpl : Companion.DefaultStepDescriptor(functionName = "performTsoCommand")
 }

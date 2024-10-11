@@ -50,5 +50,5 @@ constructor(val fileToSubmit: String)
   }
 
   @Extension
-  class DescriptorImpl : Companion.DefaultStepDescriptor(functionName = "submitJobSyncWithResult")
+  class DescriptorImpl : Companion.DefaultStepDescriptor(functionName = "submitJobSync")
 }
