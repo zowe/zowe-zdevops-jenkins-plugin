@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2023-2024 IBA Group.
+ * Copyright (c) 2024 IBA Group.
  *
  * This program and the accompanying materials are made available under the terms of the
  * Eclipse Public License v2.0 which accompanies this distribution, and is available at
@@ -22,20 +22,18 @@ import hudson.model.TaskListener
 import org.kohsuke.stapler.DataBoundConstructor
 import org.zowe.kotlinsdk.zowe.client.sdk.core.ZOSConnection
 import org.zowe.zdevops.declarative.AbstractZosmfActionWithResult
-import org.zowe.zdevops.logic.performTsoCommand
+import org.zowe.zdevops.logic.performMvsCommand
 
 /**
- * Class that represents an action to perform a TSO command with a result in a declarative pipeline.
- * This class extends {@code AbstractZosmfActionWithResult} and is designed to execute a TSO command
+ * Class that represents an action to perform an MVS command with a result in a declarative pipeline.
+ * This class extends {@code AbstractZosmfActionWithResult} and is designed to execute an MVS command
  * via Zowe z/OSMF and return the command's output.
  *
- * @param acct the TSO account number.
- * @param command the TSO command to be executed.
+ * @param command the MVS command to be executed.
  */
-class PerformTsoCommandDeclarative
+class PerformMvsCommandDeclarative
 @DataBoundConstructor
 constructor(
-  val acct: String,
   val command: String,
 ) : AbstractZosmfActionWithResult() {
 
@@ -45,10 +43,10 @@ constructor(
     envVars: EnvVars,
     zoweZOSConnection: ZOSConnection
   ): String {
-    return performTsoCommand(zoweZOSConnection, listener, acct, command)
-      ?: throw AbortException("TSO command execution returned an empty result")
+    return performMvsCommand(zoweZOSConnection, listener, command)
+      ?: throw AbortException("MVS command execution returned an empty result")
   }
 
   @Extension
-  class DescriptorImpl : Companion.DefaultStepDescriptor(functionName = "performTsoCommand")
+  class DescriptorImpl : Companion.DefaultStepDescriptor(functionName = "performMvsCommand")
 }

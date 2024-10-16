@@ -129,6 +129,47 @@ deleteDataset dsn:"EXAMPLE.DATASET"
     ISRZ002 Data set in use - Data set 'EXAMPLE.DS.ISUSED.BY.USER' in use by another user, try later or enter HELP for a list of jobs and users allocated to 'EXAMPLE.DS.ISUSED.BY.USER'.
     ```
 
+### `performMvsCommand` - Execute an MVS System Command
+The output of a command can be returned to a variable and subsequently processed. The step must be accompanied by `script` tag. It gives wide range of options such displaying system activities, device statuses, managing configuration, starting system tasks, etc.
+
+#### Usage:
+
+The step can be specified in two ways:
+```groovy
+performMvsCommand "DISPLAY TIME"
+```
+or using the named parameter:
+```groovy
+performMvsCommand command: "DISPLAY TIME"
+```
+**Mandatory Parameters:** there is only one parameter - `command`.
+
+#### Example - Displaying Active Units of Work:
+To display detailed information about all active units of work, use the following command:
+```groovy
+def active_units = performMvsCommand "D A,L"
+```
+
+#### Expected behavior under various scenarios:
+
+* Insufficient Authorization: you are not authorized to issue the command:
+    ```
+    [Perform MVS command] - Issuing command : D T
+    [Perform MVS command] - MVS command execution failed
+    
+    Also:   org.jenkinsci.plugins.workflow.actions.ErrorAction$ErrorId: f3f36e14-75f5-48ec-a47e-32727371972b
+    java.lang.Exception: {"reason":"Unexpected IEE136I: IEE345I DISPLAY  AUTHORITY INVALID, FAILED BY SECURITY PRODUCT","return-code":5,"reason-code":4}
+    ```
+* Successful Execution:
+    ```
+    [Perform MVS command] - Issuing command : D A,L
+    CNZ4105I 12.45.44 DISPLAY ACTIVITY 535
+    ...
+    [Perform MVS command] - The command has been successfully executed
+    ```
+
+
+
 ## Use case example
 Here you can find an example of a minimal declarative Jenkins pipeline for execution, testing and further modification for your personal needs.
 Pipeline can be used either directly inside the ```Pipeline``` code block in the Jenkins server, or in a ```Jenkinsfile``` stored in Git
