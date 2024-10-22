@@ -1,17 +1,22 @@
 /*
+ * Copyright (c) 2023-2024 IBA Group.
+ *
  * This program and the accompanying materials are made available under the terms of the
  * Eclipse Public License v2.0 which accompanies this distribution, and is available at
  * https://www.eclipse.org/legal/epl-v20.html
  *
  * SPDX-License-Identifier: EPL-2.0
  *
- * Copyright IBA Group 2023
+ * Contributors:
+ *   IBA Group
+ *   Zowe Community
  */
 
 package org.zowe.zdevops.logic
 
 import hudson.AbortException
 import hudson.FilePath
+import hudson.console.HyperlinkNote
 import hudson.model.TaskListener
 import org.apache.commons.io.IOUtils
 import org.zowe.kotlinsdk.DatasetOrganization
@@ -36,6 +41,7 @@ import java.io.StringWriter
  * @param zosConnection    The connection to the z/OS system.
  * @param workspace        The workspace where the dataset will be downloaded.
  * @param listener         The listener for capturing task progress and logs.
+ * @param jenkinsJobUrl    The job/pipeline URL
  */
 fun downloadDS(
     dsn: String,
@@ -43,7 +49,8 @@ fun downloadDS(
     returnEtag: Boolean?,
     zosConnection: ZOSConnection,
     workspace: FilePath,
-    listener: TaskListener
+    listener: TaskListener,
+    jenkinsJobUrl: String?,
 ) {
     var downloadedDSN: InputStream?
     try {
@@ -55,7 +62,8 @@ fun downloadDS(
     IOUtils.copy(downloadedDSN, writer, "UTF-8")
     val file = File("$workspace\\$dsn")
     file.writeText(writer.toString())
-    listener.logger.println(Messages.zdevops_declarative_DSN_downloaded_success(dsn))
+    listener.logger.println(Messages.zdevops_declarative_DSN_downloaded_success(
+        HyperlinkNote.encodeTo("${jenkinsJobUrl}ws/$dsn/*view*/", dsn)))
 }
 
 /**
@@ -67,6 +75,7 @@ fun downloadDS(
  * @param listener         The listener for capturing task progress and logs.
  * @param zosConnection    The connection to the z/OS system.
  * @param workspace        The workspace where the dataset will be downloaded.
+ * @param jenkinsJobUrl    The job/pipeline URL
  */
 fun downloadDSOrDSMemberByType(
     dsn: String,
@@ -74,23 +83,24 @@ fun downloadDSOrDSMemberByType(
     returnEtag: Boolean?,
     listener: TaskListener,
     zosConnection: ZOSConnection,
-    workspace: FilePath
+    workspace: FilePath,
+    jenkinsJobUrl: String?
 ) {
     listener.logger.println(Messages.zdevops_declarative_DSN_downloading(dsn, vol, zosConnection.host, zosConnection.zosmfPort))
     val dsnMemberPattern = Regex("[\\w#\$@.-]{1,}\\([\\w#\$@]{1,8}\\)") //means it's a PDS member
     if (dsn.contains(dsnMemberPattern)) {
-        downloadDS(dsn, vol, returnEtag, zosConnection, workspace, listener)
+        downloadDS(dsn, vol, returnEtag, zosConnection, workspace, listener, jenkinsJobUrl)
     } else {
         val dsnList = ZosDsnList(zosConnection).listDsn(dsn, ListParams(vol))
         if (dsnList.items.isEmpty()) {
             throw AbortException("Can't find $dsn ${ if(vol.isNullOrBlank()) "" else "on volume $vol"}")
         }
         when (dsnList.items.first().datasetOrganization) {
-            DatasetOrganization.PS -> downloadDS(dsn, vol, returnEtag, zosConnection, workspace, listener)
+            DatasetOrganization.PS -> downloadDS(dsn, vol, returnEtag, zosConnection, workspace, listener, jenkinsJobUrl)
             DatasetOrganization.PO, DatasetOrganization.POE -> {
                 listener.logger.println(Messages.zdevops_declarative_DSN_downloading_members(dsn))
                 ZosDsnList(zosConnection).listDsnMembers(dsn, ListParams(vol)).items.forEach {
-                    downloadDS("${dsn}(${it.name})", vol, returnEtag, zosConnection, workspace, listener)
+                    downloadDS("${dsn}(${it.name})", vol, returnEtag, zosConnection, workspace, listener, jenkinsJobUrl)
                 }
             }
             else -> listener.logger.println(Messages.zdevops_declarative_DSN_downloading_invalid_dsorg())
