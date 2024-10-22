@@ -1,11 +1,15 @@
 /*
+ * Copyright (c) 2024 IBA Group.
+ *
  * This program and the accompanying materials are made available under the terms of the
  * Eclipse Public License v2.0 which accompanies this distribution, and is available at
  * https://www.eclipse.org/legal/epl-v20.html
  *
  * SPDX-License-Identifier: EPL-2.0
  *
- * Copyright IBA Group 2022
+ * Contributors:
+ *   IBA Group
+ *   Zowe Community
  */
 
 package org.zowe.zdevops.classic.steps
@@ -15,12 +19,15 @@ import hudson.Extension
 import hudson.Launcher
 import hudson.model.AbstractBuild
 import hudson.model.BuildListener
+import hudson.util.FormValidation
 import org.kohsuke.stapler.DataBoundConstructor
+import org.kohsuke.stapler.QueryParameter
 import org.kohsuke.stapler.bind.JavaScriptMethod
 import org.zowe.zdevops.Messages
 import org.zowe.zdevops.classic.AbstractBuildStep
 import org.zowe.zdevops.logic.submitJob
 import org.zowe.zdevops.logic.submitJobSync
+import org.zowe.zdevops.utils.validateFieldIsNotEmpty
 
 class SubmitJobStep
 @DataBoundConstructor
@@ -66,5 +73,16 @@ constructor(
     fun createStepId(): String {
       return marker + lastStepId++.toString()
     }
+
+    /**
+     * Performs form validation for the 'jobName' parameter to ensure it is not empty.
+     *
+     * @param jobName job to run
+     * @return A {@link FormValidation} object indicating whether the field is valid or contains an error.
+     */
+    fun doCheckJobName(@QueryParameter jobName: String): FormValidation? {
+      return validateFieldIsNotEmpty(jobName)
+    }
+
   }
 }
