@@ -1,0 +1,6 @@
+{
+  "cmd-response-key": "C1977656",
+  "cmd-response-url": "https://192.168.1.1:10443/zosmf/restconsoles/consoles/defcn/solmsgs/C1977656",
+  "cmd-response-uri": "/zosmf/restconsoles/consoles/defcn/solmsgs/C1977656",
+  "cmd-response": " CNZ4105I 12.56.27 DISPLAY ACTIVITY 546\r  JOBS     M/S    TS USERS    SYSAS    INITS   ACTIVE/MAX VTAM     OAS\r 00020    00040    00004      00034    00025    00002/00040       00041\r  ..."
+}
