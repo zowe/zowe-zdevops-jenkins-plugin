@@ -5,7 +5,7 @@ inputs:
   jdkVersion:
     description: "JDK version"
     required: false
-    default: "11"
+    default: "17"
   mavenVersion:
     description: "Maven version"
     required: false

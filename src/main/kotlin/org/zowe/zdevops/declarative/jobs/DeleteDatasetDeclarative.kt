@@ -66,12 +66,16 @@ class DeleteDatasetDeclarative @DataBoundConstructor constructor(
 
     private var dsn: String = ""
     private var member: String = ""
+    private var failOnNotExist: Boolean = false
 
     @DataBoundSetter
     fun setDsn(dsn: String) { this.dsn = dsn }
 
     @DataBoundSetter
     fun setMember(member: String) { this.member = member }
+
+    @DataBoundSetter
+    fun setFailOnNotExist(failOnNotExist: Boolean) { this.failOnNotExist = failOnNotExist }
 
     override val exceptionMessage: String = zMessages.zdevops_deleting_ds_fail()
 
@@ -83,7 +87,7 @@ class DeleteDatasetDeclarative @DataBoundConstructor constructor(
         listener: TaskListener,
         zosConnection: ZOSConnection
     ) {
-        deleteDatasetOrMember(dsn, member, zosConnection, listener)
+        deleteDatasetOrMember(dsn, member, zosConnection, listener, failOnNotExist)
     }
 
     @Symbol("deleteDataset")

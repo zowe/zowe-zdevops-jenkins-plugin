@@ -21,11 +21,9 @@ import hudson.tasks.BuildStepDescriptor
 import hudson.tasks.Builder
 import jenkins.tasks.SimpleBuildStep
 import org.zowe.kotlinsdk.zowe.client.sdk.core.ZOSConnection
-import org.zowe.zdevops.Messages
-import org.zowe.zdevops.config.ZOSConnectionList
+import org.zowe.zdevops.utils.getZoweZosConnection
 import java.io.PrintWriter
 import java.io.StringWriter
-import java.net.URL
 import java.nio.charset.StandardCharsets
 
 abstract class AbstractZosmfAction : Builder(), SimpleBuildStep {
@@ -38,18 +36,8 @@ abstract class AbstractZosmfAction : Builder(), SimpleBuildStep {
 
   override fun perform(run: Run<*, *>, workspace: FilePath, env: EnvVars, launcher: Launcher, listener: TaskListener) {
     val connectionName = workspace.read().readBytes().toString(StandardCharsets.UTF_8)
-    val connection = ZOSConnectionList.resolve(connectionName) ?: let {
+    val zoweConnection = getZoweZosConnection(connectionName, listener)
 
-      val exception = IllegalArgumentException(Messages.zdevops_config_ZOSConnection_resolve_unknown(connectionName))
-      val sw = StringWriter()
-      exception.printStackTrace(PrintWriter(sw))
-      listener.logger.println(sw.toString())
-      throw exception
-    }
-    val connURL = URL(connection.url)
-    val zoweConnection = ZOSConnection(
-      connURL.host, connURL.port.toString(), connection.username, connection.password, connURL.protocol
-    )
     runCatching {
       perform(run, workspace, env, launcher, listener, zoweConnection)
     }.onFailure {

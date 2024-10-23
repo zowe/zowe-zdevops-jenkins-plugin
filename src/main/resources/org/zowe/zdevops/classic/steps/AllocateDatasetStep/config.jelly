@@ -86,4 +86,7 @@
             </td>
         </tr>
     </table>
+    <form:entry field="failOnExist" title="failOnExist?" description="If the dataset already exists and the option is enabled, execution will halt.">
+        <form:checkbox/>
+    </form:entry>
 </jelly:jelly>

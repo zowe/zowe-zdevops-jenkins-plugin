@@ -46,7 +46,8 @@ constructor(
    private val dsOrg: DatasetOrganization,
    private val primary: Int,
    private var secondary: Int,
-   private var recFm: RecordFormat) :
+   private var recFm: RecordFormat,
+   private var failOnExist: Boolean = false) :
     AbstractZosmfAction() {
 
     private var volser: String? = null
@@ -126,7 +127,8 @@ constructor(
             dataClass,
             avgBlk,
             dsnType,
-            dsModel
+            dsModel,
+            failOnExist,
         )
     }
 

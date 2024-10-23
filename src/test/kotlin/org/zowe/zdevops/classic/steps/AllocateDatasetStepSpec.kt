@@ -124,6 +124,74 @@ class AllocateDatasetStepSpec : ShouldSpec({
             assertSoftly { isDatasetAllocating shouldBe true }
             assertSoftly { isDatasetAllocated shouldBe true }
         }
+
+        should("fail as such dataset already exists and failOnExist is set to true") {
+            var isDatasetAllocating = false
+            var isFailedToAllocate = false
+            val taskListener = object : TestBuildListener() {
+                override fun getLogger(): PrintStream {
+                    val logger = mockk<PrintStream>()
+                    every {
+                        logger.println(any<String>())
+                    } answers {
+                        if (firstArg<String>().contains("Allocating dataset")) {
+                            isDatasetAllocating = true
+                        } else if (firstArg<String>().contains("Dataset allocation failed.")) {
+                            isFailedToAllocate = true
+                        } else {
+                            fail("Unexpected logger message: ${firstArg<String>()}")
+                        }
+                    }
+                    return logger
+                }
+            }
+            val launcher = TestLauncher(taskListener, virtualChannel)
+
+            responseDispatcher.injectEndpoint(
+                this.testCase.name.testName,
+                { it?.requestLine?.contains("/zosmf/restfiles/ds/") ?: false },
+                { MockResponse().setResponseCode(409) }
+            )
+
+            val allocateDatasetStepInst = spyk(
+                AllocateDatasetStep(
+                    "test",
+                    "TEST.IJMP.DATASET1",
+                    DatasetOrganization.PS,
+                    1,
+                    0,
+                    RecordFormat.F,
+                    failOnExist = true
+                )
+            )
+            allocateDatasetStepInst.setAlcUnit(AllocationUnit.CYL)
+            allocateDatasetStepInst.setStorClass("")
+            allocateDatasetStepInst.setStorClass("TEST")
+            allocateDatasetStepInst.setMgntClass("")
+            allocateDatasetStepInst.setMgntClass("TEST")
+            allocateDatasetStepInst.setDataClass("")
+            allocateDatasetStepInst.setDataClass("TEST")
+            allocateDatasetStepInst.setVolser("")
+            allocateDatasetStepInst.setVolser("TEST")
+            allocateDatasetStepInst.setUnit("")
+            allocateDatasetStepInst.setUnit("TEST")
+            allocateDatasetStepInst.setLrecl(3120)
+            allocateDatasetStepInst.setBlkSize(3120)
+            allocateDatasetStepInst.setDsnType(DsnameType.BASIC)
+            try {
+                allocateDatasetStepInst.perform(
+                    build,
+                    launcher,
+                    taskListener,
+                    zosConnection
+                )
+            } catch (ex: Exception) {
+                isFailedToAllocate = true
+            }
+            assertSoftly { isDatasetAllocating shouldBe true }
+            assertSoftly { isFailedToAllocate shouldBe true }
+        }
+
     }
 
     val descriptor = AllocateDatasetStep.DescriptorImpl()
