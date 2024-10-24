@@ -45,7 +45,7 @@ stage ("stage-name") {
         submitJobSync "//'EXAMPLE.DATASET(MEMBER)'"
         downloadDS "EXAMPLE.DATASET(MEMBER)"
         downloadDS dsn:"EXAMPLE.DATASET(MEMBER)", vol:"VOL001"
-        allocateDS dsn:"EXAMPLE.DATASET", alcUnit:"TRK", dsOrg:"PS", primary:1, secondary:1, recFm:"FB"
+        allocateDS dsn:"EXAMPLE.DATASET", alcUnit:"TRK", dsOrg:"PS", primary:1, secondary:1, recFm:"FB", failOnExist:"False"
         writeFileToDS dsn:"EXAMPLE.DATASET", file:"workspaceFile"
         writeFileToDS dsn:"EXAMPLE.DATASET", file:"D:\\files\\localFile"
         writeToDS dsn:"EXAMPLE.DATASET", text:"Write this string to dataset"
@@ -57,9 +57,9 @@ stage ("stage-name") {
         writeFileToFile destFile: "u/USER/myfile", sourceFile: "myfile.txt"
         writeFileToFile destFile: "u/USER/myfile", sourceFile: "myfile.txt", binary: "true"
 
-        deleteDataset dsn:"EXAMPLE.DATASET"
-        deleteDataset dsn:"EXAMPLE.DATASET", member:"MEMBER"
-        deleteDatasetsByMask mask:"EXAMPLE.DATASET.*"
+        deleteDataset dsn:"EXAMPLE.DATASET", failOnNotExist:"False"
+        deleteDataset dsn:"EXAMPLE.DATASET", member:"MEMBER", failOnNotExist:"True"
+        deleteDatasetsByMask mask:"EXAMPLE.DATASET.*", failOnNotExist:"False"
     }
     // ...
   }
@@ -78,6 +78,7 @@ zosmf ("z/os-connection-name") {
         primary: 1,
         secondary: 1,
         recFm: "FB",
+        failOnExist:"False",
         // Optional Parameters below:
         volser:"YOURVOL",
         unit:"SYSDA",
@@ -100,6 +101,7 @@ zosmf ("z/os-connection-name") {
    * ```primary:"1"``` - The primary allocation size in cylinders or tracks
    * ```secondary:"1"``` - The secondary allocation size in cylinders or tracks
    * ```recFm:"FB"``` - The record format (could be only F, FB, V, VB, U, VSAM, VA)
+   * ```failOnExist:"False"``` - If the dataset already exists and the option is enabled, execution will halt. (Boolean parameter, is set to 'False' by default)
 
 **Optional parms:**
    * ```volser:"YOURVOL"``` - Volume serial number where the dataset will be allocated.
@@ -119,18 +121,19 @@ zosmf ("z/os-connection-name") {
 ### deleteDataset - Represents an action for deleting datasets and members in a declarative style
 ```groovy
 zosmf ("z/os-connection-name") {
-    deleteDataset dsn: "EXAMPLE.DATASET", member:"MEMBER"
+    deleteDataset dsn: "EXAMPLE.DATASET", member:"MEMBER", failOnNotExist:"False"
 }
 ```
 **Mandatory Parameters:**
    * ```dsn:"EXAMPLE.DATASET"``` - Sequential or library dataset name for deletion
    * ```member:"MEMBER"``` - Dataset member name for deletion
+   * ```failOnNotExist:"False"``` - If the dataset has been deleted and the option is enabled, execution will halt. (Boolean parameter, is set to 'False' by default)
 
 **Expected behavior under various deletion scenarios:**
 
 * To delete a member from the library, the dsn and member parameters must be specified:
     ```
-    deleteDataset dsn:"EXAMPLE.DATASET", member:"MEMBER"
+    deleteDataset dsn:"EXAMPLE.DATASET", member:"MEMBER", failOnNotExist:"False"
     ```
 
 * You cannot delete a VSAM dataset this way. Otherwise, you will get output similar to:
@@ -200,9 +203,9 @@ pipeline {
         stage('Allocate DSs') {
             steps {
                 zosmf("${ZOS_CONN_ID}") {
-                    allocateDS dsn:"${PS_DATASET_1}", dsOrg:"PS", primary:1, secondary:1, recFm:"FB"
-                    allocateDS dsn:"${PS_DATASET_2}", dsOrg:"PS", primary:1, secondary:1, recFm:"FB", alcUnit:"TRK"
-                    allocateDS dsn:"${PO_DATASET}(${PO_MEMBER})", dsOrg:"PO", primary:1, secondary:1, recFm:"FB"
+                    allocateDS dsn:"${PS_DATASET_1}", dsOrg:"PS", primary:1, secondary:1, recFm:"FB", failOnExist:"False"
+                    allocateDS dsn:"${PS_DATASET_2}", dsOrg:"PS", primary:1, secondary:1, recFm:"FB", alcUnit:"TRK", failOnExist:"False"
+                    allocateDS dsn:"${PO_DATASET}(${PO_MEMBER})", dsOrg:"PO", primary:1, secondary:1, recFm:"FB", failOnExist:"False"
                 }
             }
         }
@@ -253,8 +256,8 @@ pipeline {
         stage('Clean up') {
             steps {
                 zosmf("${ZOS_CONN_ID}") {
-                    deleteDataset dsn:"${PS_DATASET_1}"
-                    deleteDatasetsByMask mask:"${HLQ}.NEW.*"
+                    deleteDataset dsn:"${PS_DATASET_1}", failOnNotExist:"False"
+                    deleteDatasetsByMask mask:"${HLQ}.NEW.*", failOnNotExist:"True"
                 }
             }
         }
