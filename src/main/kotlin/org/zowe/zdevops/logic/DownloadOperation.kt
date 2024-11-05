@@ -29,7 +29,8 @@ import org.zowe.zdevops.Messages
 import java.io.File
 import java.io.InputStream
 import java.io.StringWriter
-
+import java.net.URLEncoder
+import java.nio.charset.StandardCharsets
 
 
 /**
@@ -62,8 +63,9 @@ fun downloadDS(
     IOUtils.copy(downloadedDSN, writer, "UTF-8")
     val file = File("$workspace\\$dsn")
     file.writeText(writer.toString())
+    val urlEncodedDsn = URLEncoder.encode(dsn, StandardCharsets.UTF_8.toString())
     listener.logger.println(Messages.zdevops_declarative_DSN_downloaded_success(
-        HyperlinkNote.encodeTo("${jenkinsJobUrl}ws/$dsn/*view*/", dsn)))
+        HyperlinkNote.encodeTo("${jenkinsJobUrl}ws/$urlEncodedDsn/*view*/", dsn)))
 }
 
 /**
