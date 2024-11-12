@@ -92,13 +92,18 @@ fun submitJobSync(
         val fullLog = spoolFiles.joinToString { GetJobs(zosConnection).getSpoolContent(it) }
         val logPath = "$workspacePath/${finalResult.jobName}.${finalResult.jobId}"
         val file = File(logPath)
-        file.writeText(fullLog)
-        listener.logger.println(Messages.zdevops_declarative_ZOSJobs_got_log(
-            HyperlinkNote.encodeTo(
-                linkBuilder(buildUrl, finalResult.jobName, finalResult.jobId),
-                "${finalResult.jobName}.${finalResult.jobId}"
-            )
-        ))
+        try {
+            file.writeText(fullLog)
+            listener.logger.println(Messages.zdevops_declarative_ZOSJobs_got_log(
+                HyperlinkNote.encodeTo(
+                    linkBuilder(buildUrl, finalResult.jobName, finalResult.jobId),
+                    "${finalResult.jobName}.${finalResult.jobId}"
+                )
+            ))
+        } catch (ex: Exception) {
+            listener.logger.println("[WARNING] - Couldn't write the log to a file in workspace. The problem was: " + ex.message)
+            listener.logger.println("Posting logs here: \n$fullLog")
+        }
     } else {
         listener.logger.println(Messages.zdevops_no_spool_files(submitJobRsp.jobid))
     }
