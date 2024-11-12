@@ -21,6 +21,7 @@ All notable changes to the Zowe zDevOps Jenkins Plugin will be documented in thi
 * Feature: Added Jenkins Freestyle UI method - "Write text to member" ([4e4d73cc](https://github.com/zowe/zowe-zdevops-jenkins-plugin/commit/4e4d73cc))
 * Feature: Added dataset member name validation ([b05c7436](https://github.com/zowe/zowe-zdevops-jenkins-plugin/commit/b05c7436))
 * Feature: Added hpi-builder.yml GitHub workflow for automated .hpi builds ([c0fd9f27](https://github.com/zowe/zowe-zdevops-jenkins-plugin/commit/c0fd9f27))
+* Feature: Added failOnExist parameter for allocateDS, deleteDataset and deleteDatasetsByMask declarative/Freestyle UI methods (checks the presence/absence of a dataset on the system) ([db232f49](https://github.com/zowe/zowe-zdevops-jenkins-plugin/commit/db232f49))
 
 ### Bugfixes
 
