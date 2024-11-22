@@ -27,7 +27,7 @@ Thank you for considering IBA Group for your mainframe needs.
 
 ## Before use - Plugin configuration
 After successfully installing the plugin, you need to configure it for further work - this will require a minimum of actions.
-1. Move to “Manage Jenkins” -> “Configure System / System” -> scroll to the very bottom of the list of installed plugins and find the panel with the name - <b>“z/OS Connection List”</b>
+1. Move to 'Manage Jenkins' -> 'Configure System / System' -> scroll to the very bottom of the list of installed plugins and find the panel with the name - <b>'z/OS Connection List'</b>
 2. This setting allows you to add all necessary z/OS systems and configure access to them.
    It is necessary to set the connection name (it is also the ID for declarative methods in the code). For the example: ```z/os-connection-name```
 3. The URL address and port of the required mainframe to connect via z/OSMF. Example: ```https://<ip-addres>:<port number>```
@@ -45,7 +45,7 @@ stage ("stage-name") {
         submitJobSync "//'EXAMPLE.DATASET(MEMBER)'"
         downloadDS "EXAMPLE.DATASET(MEMBER)"
         downloadDS dsn:"EXAMPLE.DATASET(MEMBER)", vol:"VOL001"
-        allocateDS dsn:"EXAMPLE.DATASET", alcUnit:"TRK", dsOrg:"PS", primary:1, secondary:1, recFm:"FB"
+        allocateDS dsn:"EXAMPLE.DATASET", alcUnit:"TRK", dsOrg:"PS", primary:1, secondary:1, recFm:"FB", failOnExist:"False"
         writeFileToDS dsn:"EXAMPLE.DATASET", file:"workspaceFile"
         writeFileToDS dsn:"EXAMPLE.DATASET", file:"D:\\files\\localFile"
         writeToDS dsn:"EXAMPLE.DATASET", text:"Write this string to dataset"
@@ -57,9 +57,9 @@ stage ("stage-name") {
         writeFileToFile destFile: "u/USER/myfile", sourceFile: "myfile.txt"
         writeFileToFile destFile: "u/USER/myfile", sourceFile: "myfile.txt", binary: "true"
 
-        deleteDataset dsn:"EXAMPLE.DATASET"
-        deleteDataset dsn:"EXAMPLE.DATASET(MEMBER)"
-        deleteDatasetsByMask mask:"EXAMPLE.DATASET.*"
+        deleteDataset dsn:"EXAMPLE.DATASET", failOnNotExist:"False"
+        deleteDataset dsn:"EXAMPLE.DATASET(MEMBER)", failOnNotExist:"True"
+        deleteDatasetsByMask mask:"EXAMPLE.DATASET.*", failOnNotExist:"False"
     }
     // ...
   }
@@ -70,7 +70,30 @@ stage ("stage-name") {
 
 ### allocateDS - Represents an action for allocating a dataset in a declarative style
 ```groovy
-allocateDS dsn:"EXAMPLE.DATASET", dsOrg:"PS", primary:1, secondary:1, recFm:"FB"
+zosmf ("z/os-connection-name") {
+    allocateDS(
+        // Mandatory Parameters below:
+        dsn: "EXAMPLE.DATASET",
+        dsOrg: "PS",
+        primary: 1,
+        secondary: 1,
+        recFm: "FB",
+        failOnExist:"False",
+        // Optional Parameters below:
+        volser:"YOURVOL",
+        unit:"SYSDA",
+        alcUnit:"TRK",
+        dirBlk:"5",
+        blkSize:"800",
+        lrecl:"80",
+        storClass:"STORAGECLASS",
+        mgntClass:"MGMTCLASS",
+        dataClass:"DATACLASS",
+        avgBlk:"10",
+        dsnType:"LIBRARY",
+        dsModel:"MODEL.DATASET.NAME"
+    )
+}
 ```
 **Mandatory Parameters:**
    * ```dsn:"EXAMPLE.DATASET"``` - The name of the dataset to be allocated
@@ -78,6 +101,7 @@ allocateDS dsn:"EXAMPLE.DATASET", dsOrg:"PS", primary:1, secondary:1, recFm:"FB"
    * ```primary:"1"``` - The primary allocation size in cylinders or tracks
    * ```secondary:"1"``` - The secondary allocation size in cylinders or tracks
    * ```recFm:"FB"``` - The record format (could be only F, FB, V, VB, U, VSAM, VA)
+   * ```failOnExist:"False"``` - If the dataset already exists and the option is enabled, execution will halt. (Boolean parameter, is set to 'False' by default)
 
 **Optional parms:**
    * ```volser:"YOURVOL"``` - Volume serial number where the dataset will be allocated.
@@ -96,19 +120,20 @@ allocateDS dsn:"EXAMPLE.DATASET", dsOrg:"PS", primary:1, secondary:1, recFm:"FB"
 
 ### deleteDataset - Represents an action for deleting datasets and members in a declarative style
 ```groovy
-deleteDataset dsn:"EXAMPLE.DATASET", failOnNotExist: true
+zosmf ("z/os-connection-name") {
+    deleteDataset dsn: "EXAMPLE.DATASET(MEMBER)", failOnNotExist: false
+}
 ```
 **Mandatory Parameters:**
    * ```dsn:"EXAMPLE.DATASET"``` - Sequential or library dataset name in the form `HLQ.DSNAME` or `HLQ.DSNAME(MEMNAME)`
 **Optional Parameters:**
-   * `failOnNotExist: false` - Fail the execution if the entity does not exist
-
+   * `failOnNotExist: false` - Fail the execution if the entity does not exist. Boolean parameter, is set to 'false' by default.
 
 **Expected behavior under various deletion scenarios:**
 
 * To delete a member from the library, provide dataset member name in the form `HLQ.DSNAME(MEMNAME)`:
     ```
-    deleteDataset dsn:"EXAMPLE.DATASET(MEMBER1)"
+    deleteDataset dsn:"EXAMPLE.DATASET(MEMBER1)", failOnNotExist: false
     ```
 
 * You cannot delete a VSAM dataset this way. Otherwise, you will get output similar to:
@@ -178,7 +203,7 @@ Pipeline can be used either directly inside the ```Pipeline``` code block in the
 This pipeline example uses all currently available methods and functionality of the Zowe zDevOps plugin.
 
 **Steps to Execute the Pipeline:**
-1. Add a zosmf connection in settings (<b>“Manage Jenkins” -> “Configure System / System” -> z/OS Connection List</b>). Enter a connection name, zosmf url, username and password.
+1. Add a zosmf connection in settings (<b>'Manage Jenkins' -> 'Configure System / System' -> z/OS Connection List</b>). Enter a connection name, zosmf url, username and password.
 2. Create a new Jenkins item -> ```Pipeline``` and open its configuration.
 3. In the ```Pipeline``` section, paste the code from the example below and replace all the necessary variables with your data
 4. Done, enjoy the minimal ready-made pipeline template!
@@ -219,9 +244,9 @@ pipeline {
         stage('Allocate DSs') {
             steps {
                 zosmf("${ZOS_CONN_ID}") {
-                    allocateDS dsn:"${PS_DATASET_1}", dsOrg:"PS", primary:1, secondary:1, recFm:"FB"
-                    allocateDS dsn:"${PS_DATASET_2}", dsOrg:"PS", primary:1, secondary:1, recFm:"FB", alcUnit:"TRK"
-                    allocateDS dsn:"${PO_DATASET}(${PO_MEMBER})", dsOrg:"PO", primary:1, secondary:1, recFm:"FB"
+                    allocateDS dsn:"${PS_DATASET_1}", dsOrg:"PS", primary:1, secondary:1, recFm:"FB", failOnExist:"False"
+                    allocateDS dsn:"${PS_DATASET_2}", dsOrg:"PS", primary:1, secondary:1, recFm:"FB", alcUnit:"TRK", failOnExist:"False"
+                    allocateDS dsn:"${PO_DATASET}(${PO_MEMBER})", dsOrg:"PO", primary:1, secondary:1, recFm:"FB", failOnExist:"False"
                 }
             }
         }
@@ -272,8 +297,8 @@ pipeline {
         stage('Clean up') {
             steps {
                 zosmf("${ZOS_CONN_ID}") {
-                    deleteDataset dsn:"${PS_DATASET_1}"
-                    deleteDatasetsByMask mask:"${HLQ}.NEW.*"
+                    deleteDataset dsn:"${PS_DATASET_1}", failOnNotExist:"False"
+                    deleteDatasetsByMask mask:"${HLQ}.NEW.*", failOnNotExist:"True"
                 }
             }
         }
@@ -323,7 +348,7 @@ The plugin are packaged as self-contained <b>.hpi</b> files, which have all the 
 ### <b>[Zowe zDevOps plugin installation .hpi file](https://github.com/IBA-mainframe-dev/Global-Repository-for-Mainframe-Developers/blob/master/Jenkins%20zOS%20DevOps%20plugin%20installable%20hpi/zos-devops.hpi)</b>
 
 Assuming a <b>.hpi</b> file has been downloaded, a logged-in Jenkins administrator may upload the file from within the web UI:
-1. Navigate to the <b>Manage Jenkins > Manage Plugins</b> page in the web UI.
+1. Navigate to the <b>Manage Jenkins > Plugins</b> page in the web UI.
 2. Click on the <b>Advanced</b> tab.
 3. Choose the <b>.hpi</b> file from your system or enter a URL to the archive file under the <b>Deploy Plugin</b> section.
 4. <b>Deploy</b> the plugin file.
@@ -334,8 +359,8 @@ Assuming a <b>.hpi</b> file has been downloaded, a logged-in Jenkins administrat
 3. To generate the ```target``` dir with generated-sources - you have to run the Maven command: ```mvn localizer:generate```
 4. Next, you need to generate an installation file: .hpi or .jpi file (both are installation files for the Jenkins plugin). This can be done by executing Maven command ```mvn install``` or by ```mvn hpi:hpi```.
 5. After building the .hpi/.jpi file, it should appear in a <b><Plugin-project-name>/build/libs/<hpi_file_name>.hpi</b> directory
-6. Next you need to login into the Jenkins, move to the <b>“Manage Jenkins” -> “Manage Plugins” -> “Advanced (tab)” -> “Deploy Plugin”</b> (You can select a plugin file from your local system or provide a URL to install a plugin from outside the central plugin repository) <b>-> Specify the path to the generated .hpi/.jpi file</b> (or by dragging the file from Intellij IDEA project to the file upload field in the Jenkins).
-7. Click <b>“Deploy”</b>, reboot Jenkins after installation. The Plugin is ready to go!
+6. Next you need to login into the Jenkins, move to the <b>'Manage Jenkins' -> 'Plugins' -> 'Advanced settings (tab)' -> 'Deploy Plugin'</b> (You can select a plugin file from your local system or provide a URL to install a plugin from outside the central plugin repository) <b>-> Specify the path to the generated .hpi/.jpi file</b> (or by dragging the file from Intellij IDEA project to the file upload field in the Jenkins).
+7. Click <b>'Deploy'</b>, reboot Jenkins after installation. The Plugin is ready to go!
 
 ## How to run Jenkins plugin in Debug mode in a local Jenkins sandbox
 
