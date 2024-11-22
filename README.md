@@ -58,7 +58,7 @@ stage ("stage-name") {
         writeFileToFile destFile: "u/USER/myfile", sourceFile: "myfile.txt", binary: "true"
 
         deleteDataset dsn:"EXAMPLE.DATASET"
-        deleteDataset dsn:"EXAMPLE.DATASET", member:"MEMBER"
+        deleteDataset dsn:"EXAMPLE.DATASET(MEMBER)"
         deleteDatasetsByMask mask:"EXAMPLE.DATASET.*"
     }
     // ...
@@ -96,17 +96,19 @@ allocateDS dsn:"EXAMPLE.DATASET", dsOrg:"PS", primary:1, secondary:1, recFm:"FB"
 
 ### deleteDataset - Represents an action for deleting datasets and members in a declarative style
 ```groovy
-deleteDataset dsn:"EXAMPLE.DATASET"
+deleteDataset dsn:"EXAMPLE.DATASET", failOnNotExist: true
 ```
 **Mandatory Parameters:**
-   * ```dsn:"EXAMPLE.DATASET"``` - Sequential or library dataset name for deletion
-   * ```member:"MEMBER"``` - Dataset member name for deletion
+   * ```dsn:"EXAMPLE.DATASET"``` - Sequential or library dataset name in the form `HLQ.DSNAME` or `HLQ.DSNAME(MEMNAME)`
+**Optional Parameters:**
+   * `failOnNotExist: false` - Fail the execution if the entity does not exist
+
 
 **Expected behavior under various deletion scenarios:**
 
-* To delete a member from the library, the dsn and member parameters must be specified:
+* To delete a member from the library, provide dataset member name in the form `HLQ.DSNAME(MEMNAME)`:
     ```
-    deleteDataset dsn:"EXAMPLE.DATASET", member:"MEMBER"
+    deleteDataset dsn:"EXAMPLE.DATASET(MEMBER1)"
     ```
 
 * You cannot delete a VSAM dataset this way. Otherwise, you will get output similar to:

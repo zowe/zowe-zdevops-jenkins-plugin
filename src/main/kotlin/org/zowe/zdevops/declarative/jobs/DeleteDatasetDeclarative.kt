@@ -1,11 +1,15 @@
 /*
+ * Copyright (c) 2022-2024 IBA Group.
+ *
  * This program and the accompanying materials are made available under the terms of the
  * Eclipse Public License v2.0 which accompanies this distribution, and is available at
  * https://www.eclipse.org/legal/epl-v20.html
  *
  * SPDX-License-Identifier: EPL-2.0
  *
- * Copyright IBA Group 2022
+ * Contributors:
+ *   IBA Group
+ *   Zowe Community
  */
 
 package org.zowe.zdevops.declarative.jobs
@@ -38,9 +42,9 @@ import org.zowe.zdevops.logic.deleteDatasetOrMember
  * Deleting dataset USER1A.TEST.KSDS with connection 172.20.2.2:10443
  * ISRZ002 Deallocation failed - Deallocation failed for data set 'USER1A.TEST.KSDS'
  * ```
- * To delete a member from the library, the dsn and member parameters must be specified:
+ * To delete a member from the library, provide dataset member name in the form `HLQ.DSNAME(MEMNAME)`:
  * ```
- * deleteDataset dsn:"USER1A.TEST.LIB", member:"MEMBER1"
+ * deleteDataset dsn:"USER1A.TEST.LIB(MEMBER1)"
  * ```
  * And out will be:
  * ```
@@ -57,22 +61,18 @@ import org.zowe.zdevops.logic.deleteDatasetOrMember
  * Deleting dataset USER1A.DS.ISUSED.BY.USER with connection 172.20.2.2:10443
  * ISRZ002 Data set in use - Data set 'USER1A.DS.ISUSED.BY.USER' in use by another user, try later or enter HELP for a list of jobs and users allocated to 'USER1A.DS.ISUSED.BY.USER'.
  * ```
- * It can take 2 params:
- * @param dsn dataset name - sequential or library
- * @param member dataset member name
+ * It takes:
+ * @param dsn dataset name - sequential or library - in the form HLQ.DSNAME or HLQ.DSNAME(MEMNAME) for member
+ * @param failOnNotExist Fail the execution if the entity does not exist
  */
 class DeleteDatasetDeclarative @DataBoundConstructor constructor(
 ) : AbstractZosmfAction() {
 
     private var dsn: String = ""
-    private var member: String = ""
     private var failOnNotExist: Boolean = false
 
     @DataBoundSetter
     fun setDsn(dsn: String) { this.dsn = dsn }
-
-    @DataBoundSetter
-    fun setMember(member: String) { this.member = member }
 
     @DataBoundSetter
     fun setFailOnNotExist(failOnNotExist: Boolean) { this.failOnNotExist = failOnNotExist }
@@ -87,7 +87,7 @@ class DeleteDatasetDeclarative @DataBoundConstructor constructor(
         listener: TaskListener,
         zosConnection: ZOSConnection
     ) {
-        deleteDatasetOrMember(dsn, member, zosConnection, listener, failOnNotExist)
+        deleteDatasetOrMember(dsn, zosConnection, listener, failOnNotExist)
     }
 
     @Symbol("deleteDataset")
