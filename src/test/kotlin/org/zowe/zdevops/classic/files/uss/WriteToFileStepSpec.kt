@@ -8,10 +8,8 @@
  * Copyright IBA Group 2023
  */
 
-package org.zowe.zdevops.declarative.files.uss
+package org.zowe.zdevops.classic.files.uss
 
-import hudson.EnvVars
-import hudson.FilePath
 import hudson.model.Item
 import io.kotest.assertions.assertSoftly
 import io.kotest.assertions.fail
@@ -27,17 +25,16 @@ import org.zowe.kotlinsdk.zowe.client.sdk.core.ZOSConnection
 import org.zowe.zdevops.MOCK_SERVER_HOST
 import org.zowe.zdevops.MockResponseDispatcher
 import org.zowe.zdevops.MockServerFactory
-import org.zowe.zdevops.classic.TestBuildListener
-import org.zowe.zdevops.classic.TestLauncher
+import org.zowe.zdevops.classic.TestBuild
+import org.zowe.zdevops.classic.TestProject
+import org.zowe.zdevops.declarative.TestBuildListener
 import org.zowe.zdevops.declarative.TestItemGroup
-import org.zowe.zdevops.declarative.TestJob
-import org.zowe.zdevops.declarative.TestRun
+import org.zowe.zdevops.declarative.TestLauncher
 import org.zowe.zdevops.declarative.TestVirtualChannel
 import java.io.File
 import java.io.PrintStream
-import java.nio.file.Paths
 
-class WriteFileToFileDeclarativeSpec : ShouldSpec({
+class WriteToFileStepSpec : ShouldSpec({
     lateinit var mockServer: MockWebServer
     lateinit var responseDispatcher: MockResponseDispatcher
     val mockServerFactory = MockServerFactory()
@@ -49,26 +46,22 @@ class WriteFileToFileDeclarativeSpec : ShouldSpec({
     afterSpec {
         mockServerFactory.stopMockServer()
     }
-    context("declarative/jobs module: WriteFileToFileDeclarative") {
+    context("classic/steps module: WriteToFileStep") {
         val virtualChannel = TestVirtualChannel()
         val zosConnection = ZOSConnection(mockServer.hostName, mockServer.port.toString(), "test", "test", "https")
-        val rootDir = Paths.get("").toAbsolutePath().toString()
-        val trashDir = tempdir()
+        val tempDir = tempdir()
         val itemGroup = object : TestItemGroup() {
             override fun getRootDirFor(child: Item?): File {
-                return trashDir
+                return tempDir
             }
         }
-        val job = TestJob(itemGroup, "test")
-        val run = TestRun(job)
-        val mockDir = Paths.get(rootDir, "src", "test", "resources", "mock", "here").toString()
-        val workspace = FilePath(File(mockDir))
-        val env = EnvVars()
+        val project = TestProject(itemGroup, "test")
+        val build = TestBuild(project)
 
         afterEach {
             responseDispatcher.removeAllEndpoints()
         }
-        should("perform WriteFileToFileDeclarative operation to write a local file to a USS file") {
+        should("perform WriteToFileStep operation to write text to a USS file") {
             var isWritingToFile = false
             var isWritten = false
             val taskListener = object : TestBuildListener() {
@@ -88,21 +81,19 @@ class WriteFileToFileDeclarativeSpec : ShouldSpec({
                     return logger
                 }
             }
+            val filePath = "/u/TEST/test.txt"
             val launcher = TestLauncher(taskListener, virtualChannel)
             responseDispatcher.injectEndpoint(
                 "${this.testCase.name.testName}_UssFile",
-                { it?.requestLine?.contains("zosmf/restfiles/fs") ?: false },
+                { it?.requestLine?.contains("zosmf/restfiles/fs${filePath}") ?: false },
                 { MockResponse().setBody("") }
             )
 
-            val writeFileToFileDecl = spyk(
-                WriteFileToFileDeclarative("/u/TEST/test.txt", "test_file.txt")
+            val writeTextToFileDecl = spyk(
+                WriteToFileStep("test", filePath, "TEXT TO WRITE")
             )
-
-            writeFileToFileDecl.perform(
-                run,
-                workspace,
-                env,
+            writeTextToFileDecl.perform(
+                build,
                 launcher,
                 taskListener,
                 zosConnection
