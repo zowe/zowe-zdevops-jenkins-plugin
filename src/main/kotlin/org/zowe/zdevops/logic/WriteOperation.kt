@@ -270,7 +270,7 @@ private fun processEntry(
  * Upon successful validation, the file content is written to a member in the specified dataset,
  * using the file's name (without extension) as the member name.
  */
-private fun writeFileToDataset(
+fun writeFileToDataset(
   file: File,
   dsn: String,
   lrecl: Int,
