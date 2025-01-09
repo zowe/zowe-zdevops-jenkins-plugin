@@ -20,7 +20,7 @@ import hudson.FilePath
 import hudson.model.TaskListener
 import org.kohsuke.stapler.DataBoundConstructor
 import org.zowe.kotlinsdk.zowe.client.sdk.core.ZOSConnection
-import org.zowe.zdevops.declarative.AbstractZosmfActionWithResult
+import org.zowe.zdevops.declarative.core.AbstractZosmfActionWithResult
 import org.zowe.zdevops.logic.submitJobSync
 
 /**

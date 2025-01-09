@@ -16,7 +16,7 @@ import hudson.model.TaskListener
 import org.jenkinsci.Symbol
 import org.kohsuke.stapler.DataBoundConstructor
 import org.zowe.kotlinsdk.zowe.client.sdk.core.ZOSConnection
-import org.zowe.zdevops.declarative.AbstractZosmfAction
+import org.zowe.zdevops.declarative.core.AbstractZosmfAction
 import org.zowe.zdevops.logic.submitJob
 
 typealias zMessages = org.zowe.zdevops.Messages

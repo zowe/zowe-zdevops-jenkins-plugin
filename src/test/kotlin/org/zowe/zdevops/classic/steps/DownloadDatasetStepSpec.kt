@@ -31,10 +31,10 @@ import org.zowe.zdevops.MOCK_SERVER_HOST
 import org.zowe.zdevops.Messages
 import org.zowe.zdevops.MockResponseDispatcher
 import org.zowe.zdevops.MockServerFactory
-import org.zowe.zdevops.declarative.jobs.TestBuildListener
-import org.zowe.zdevops.declarative.jobs.TestItemGroup
-import org.zowe.zdevops.declarative.jobs.TestLauncher
-import org.zowe.zdevops.declarative.jobs.TestVirtualChannel
+import org.zowe.zdevops.declarative.TestBuildListener
+import org.zowe.zdevops.declarative.TestItemGroup
+import org.zowe.zdevops.declarative.TestLauncher
+import org.zowe.zdevops.declarative.TestVirtualChannel
 import java.io.File
 import java.io.PrintStream
 

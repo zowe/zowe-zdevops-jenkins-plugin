@@ -19,8 +19,8 @@ import org.zowe.kotlinsdk.zowe.client.sdk.core.ZOSConnection
 import org.zowe.zdevops.MOCK_SERVER_HOST
 import org.zowe.zdevops.MockResponseDispatcher
 import org.zowe.zdevops.MockServerFactory
-import org.zowe.zdevops.declarative.jobs.TestBuildListener
-import org.zowe.zdevops.declarative.jobs.TestLauncher
+import org.zowe.zdevops.declarative.TestBuildListener
+import org.zowe.zdevops.declarative.TestLauncher
 import java.io.File
 import java.io.PrintStream
 import java.nio.file.Paths
