@@ -11,9 +11,11 @@
 package org.zowe.zdevops.classic.files.dsn
 
 import hudson.AbortException
+import hudson.EnvVars
 import hudson.FilePath
 import hudson.model.Executor
 import hudson.model.Item
+import hudson.model.TaskListener
 import hudson.util.FormValidation
 import io.kotest.assertions.assertSoftly
 import io.kotest.assertions.fail
@@ -69,6 +71,12 @@ class DownloadDatasetStepSpec : ShouldSpec({
                 val mockDir = tempdir()
                 every { mockInstance.currentWorkspace } returns FilePath(virtualChannel, mockDir.absolutePath)
                 return mockInstance
+            }
+
+            override fun getEnvironment(log: TaskListener): EnvVars {
+                val env = EnvVars()
+                env["JOB_URL"] = "TEST"
+                return env
             }
         }
 

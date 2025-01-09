@@ -25,6 +25,8 @@ import org.zowe.zdevops.Messages
 import org.zowe.zdevops.utils.extractSubmitJobMessage
 import org.zowe.zdevops.utils.runMFTryCatchWrappedQuery
 import java.io.File
+import java.net.URLEncoder
+import java.nio.charset.StandardCharsets
 
 /**
  * Submits a z/OS job
@@ -93,10 +95,11 @@ fun submitJobSync(
         val logPath = "$workspacePath/${finalResult.jobName}.${finalResult.jobId}"
         val file = File(logPath)
         file.writeText(fullLog)
+        val urlEncodedJobName = URLEncoder.encode(finalResult.jobName, StandardCharsets.UTF_8.toString())
         listener.logger.println(Messages.zdevops_declarative_ZOSJobs_got_log(
             HyperlinkNote.encodeTo(
                 linkBuilder(buildUrl, finalResult.jobName, finalResult.jobId),
-                "${finalResult.jobName}.${finalResult.jobId}"
+                "$urlEncodedJobName.${finalResult.jobId}"
             )
         ))
     } else {

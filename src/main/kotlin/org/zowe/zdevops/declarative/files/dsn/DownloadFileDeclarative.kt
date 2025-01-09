@@ -1,11 +1,15 @@
 /*
+ * Copyright (c) 2022-2024 IBA Group.
+ *
  * This program and the accompanying materials are made available under the terms of the
  * Eclipse Public License v2.0 which accompanies this distribution, and is available at
  * https://www.eclipse.org/legal/epl-v20.html
  *
  * SPDX-License-Identifier: EPL-2.0
  *
- * Copyright IBA Group 2022
+ * Contributors:
+ *   IBA Group
+ *   Zowe Community
  */
 
 package org.zowe.zdevops.declarative.files.dsn
@@ -51,7 +55,8 @@ class DownloadFileDeclarative @DataBoundConstructor constructor(val dsn: String)
         zosConnection: ZOSConnection
     ) {
         val workspacePath = FilePath(null, workspace.remote.replace(workspace.name,""))
-        downloadDSOrDSMemberByType(dsn, vol, returnEtag, listener, zosConnection, workspacePath)
+        val jenkinsJobUrl = env["BUILD_URL"] + "/execution/node/3/"
+        downloadDSOrDSMemberByType(dsn, vol, returnEtag, listener, zosConnection, workspacePath, jenkinsJobUrl)
     }
 
 
