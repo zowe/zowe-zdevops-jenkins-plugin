@@ -6,6 +6,8 @@
 
     <jelly:set var="stepId" value="${descriptor.createStepId()}" />
 
+    <p><b>The method is deprecated. Please, consider switching to `Write File to Dataset` step.</b></p>
+
     <form:entry field="connectionName" title="${%zdevops.classic.connection.title}">
         <form:select/>
     </form:entry>

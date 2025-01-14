@@ -25,7 +25,7 @@ import org.kohsuke.stapler.DataBoundConstructor
 import org.zowe.kotlinsdk.zowe.client.sdk.core.ZOSConnection
 import org.zowe.zdevops.declarative.core.AbstractZosmfAction
 import org.zowe.zdevops.declarative.jobs.zMessages
-import org.zowe.zdevops.logic.writeDirectoryToDataset
+import org.zowe.zdevops.logic.writeDirectoryToPdsJenkins
 
 /**
  * A declarative class for writing the contents of a directory to a PDS/E dataset.
@@ -67,7 +67,7 @@ class WriteDirToDatasetDeclarative
     listener: TaskListener,
     zosConnection: ZOSConnection
   ) {
-    writeDirectoryToDataset(dsn, dir, isLocalPath, workspace, listener, zosConnection)
+    writeDirectoryToPdsJenkins(dsn, dir, isLocalPath, workspace, listener, zosConnection)
   }
 
   @Symbol("writeDirToDS")

@@ -24,14 +24,14 @@ import org.kohsuke.stapler.DataBoundSetter
 import org.kohsuke.stapler.QueryParameter
 import org.zowe.kotlinsdk.zowe.client.sdk.core.ZOSConnection
 import org.zowe.zdevops.classic.core.AbstractBuildStep
-import org.zowe.zdevops.logic.writeDirectoryToDataset
+import org.zowe.zdevops.logic.writeDirectoryToPdsJenkins
 import org.zowe.zdevops.utils.validateDatasetName
 import org.zowe.zdevops.utils.validateFieldIsNotEmpty
 
 
 /**
  * A freestyle job Jenkins class for writing the contents of a directory to a PDS/E dataset.
- * @see org.zowe.zdevops.declarative.jobs.WriteDirToDatasetDeclarative
+ * @see org.zowe.zdevops.declarative.files.dsn.WriteDirToDatasetDeclarative
  */
 class WriteDirToDatasetStep
 @DataBoundConstructor
@@ -58,7 +58,7 @@ constructor(
     zosConnection: ZOSConnection
   ) {
     val workspace = build.executor?.currentWorkspace ?: throw AbortException("'build.executor' was null")
-    writeDirectoryToDataset(dsn, dir, isLocalPath, workspace, listener, zosConnection)
+    writeDirectoryToPdsJenkins(dsn, dir, isLocalPath, workspace, listener, zosConnection)
   }
 
   @Extension

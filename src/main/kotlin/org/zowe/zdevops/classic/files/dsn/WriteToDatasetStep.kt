@@ -1,11 +1,15 @@
 /*
+ * Copyright (c) 2023-2025 IBA Group.
+ *
  * This program and the accompanying materials are made available under the terms of the
  * Eclipse Public License v2.0 which accompanies this distribution, and is available at
  * https://www.eclipse.org/legal/epl-v20.html
  *
  * SPDX-License-Identifier: EPL-2.0
  *
- * Copyright IBA Group 2023
+ * Contributors:
+ *   IBA Group
+ *   Zowe Community
  */
 
 package org.zowe.zdevops.classic.files.dsn
@@ -20,8 +24,8 @@ import org.kohsuke.stapler.QueryParameter
 import org.zowe.kotlinsdk.zowe.client.sdk.core.ZOSConnection
 import org.zowe.zdevops.Messages
 import org.zowe.zdevops.classic.core.AbstractBuildStep
-import org.zowe.zdevops.logic.writeToDataset
-import org.zowe.zdevops.utils.validateDatasetName
+import org.zowe.zdevops.logic.writeTextToDatasetJenkins
+import org.zowe.zdevops.utils.validateDsnOrDsnMemberName
 import org.zowe.zdevops.utils.validateFieldIsNotEmpty
 
 /**
@@ -57,7 +61,7 @@ constructor(
         zosConnection: ZOSConnection
     ) {
         listener.logger.println(Messages.zdevops_declarative_writing_DS_from_input(dsn, zosConnection.host, zosConnection.zosmfPort))
-        writeToDataset(listener, zosConnection, dsn, text)
+        writeTextToDatasetJenkins(listener, zosConnection, dsn, text)
     }
 
     /**
@@ -72,7 +76,7 @@ constructor(
          * @return FormValidation.ok() if the dataset name is valid, or an error message otherwise
          */
         fun doCheckDsn(@QueryParameter dsn: String): FormValidation? {
-            return validateDatasetName(dsn)
+            return validateDsnOrDsnMemberName(dsn)
         }
 
         /**

@@ -47,11 +47,11 @@ stage ("stage-name") {
         downloadDS dsn:"EXAMPLE.DATASET(MEMBER)", vol:"VOL001"
         allocateDS dsn:"EXAMPLE.DATASET", alcUnit:"TRK", dsOrg:"PS", primary:1, secondary:1, recFm:"FB", failOnExist:"False"
         writeFileToDS dsn:"EXAMPLE.DATASET", file:"workspaceFile"
+        writeFileToDS dsn:"EXAMPLE.DATASET(MEMBER)", file:"workspaceFile"
         writeFileToDS dsn:"EXAMPLE.DATASET", file:"D:\\files\\localFile"
+        writeFileToDS dsn:"EXAMPLE.DATASET(MEMBER)", file:"D:\\files\\localFile"
         writeToDS dsn:"EXAMPLE.DATASET", text:"Write this string to dataset"
-        writeFileToMember dsn:"EXAMPLE.DATASET", member:"MEMBER", file:"workspaceFile"
-        writeFileToMember dsn:"EXAMPLE.DATASET", member:"MEMBER", file:"D:\\files\\localFile"
-        writeToMember dsn:"EXAMPLE.DATASET", member:"MEMBER", text:"Write this string to member"
+        writeToDS dsn:"EXAMPLE.DATASET(MEMBER)", text:"Write this string to dataset member"
 
         writeDirToDS dir: "app/src/main/cbl/", dsn: "EXAMPLE.DATASET"
         writeDirToDS dir: "D:\\resources\\cbl", dsn: "EXAMPLE.DATASET", isLocalPath: true

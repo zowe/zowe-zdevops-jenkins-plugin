@@ -27,86 +27,45 @@ import java.io.File
 
 
 /**
- * Validates the text to be written to a dataset
+ * Parse dataset name and member name out of full dataset name
  *
- * @param listener      The listener for logging messages
- * @param zosConnection The ZOSConnection for interacting with z/OS
- * @param dsn           The name of the dataset
- * @param text          The text content to be written
- * @throws AbortException if the text is empty or contains ineligible strings.
+ * @param fullName The name of a dataset in the form `DATASET.NAME` or `DATASET.NAME(MEMBER)`
+ * @return (dataset, member) pair, where member name can be null
  */
-private fun validateTextForDataset(
-    listener: TaskListener,
-    zosConnection: ZOSConnection,
-    dsn: String,
-    text: String,
-    ) {
-    if(text == "") {
-        listener.logger.println(Messages.zdevops_declarative_writing_skip())
-        return
-    }
-
-    val stringList = text.split('\n')
-    val targetDS = ZosDsn(zosConnection).getDatasetInfo(dsn)
-    if (targetDS.recordLength == null) {
-        throw AbortException(Messages.zdevops_declarative_writing_DS_no_info(dsn))
-    }
-    var ineligibleStrings = 0
-    stringList.forEach {
-        if (it.length > targetDS.recordLength!!) {
-            ineligibleStrings++
-        }
-    }
-    if (ineligibleStrings > 0) {
-        throw AbortException(Messages.zdevops_declarative_writing_DS_ineligible_strings(ineligibleStrings,dsn))
-    }
+fun parseDatasetName(fullName: String): Pair<String, String?> {
+  val dataset = fullName.substringBefore("(")
+  val member = if (fullName.contains("(")) {
+    fullName.substringAfter("(").substringBefore(")").takeIf { it.isNotEmpty() }
+  } else {
+    null
+  }
+  return dataset to member
 }
 
 /**
- * Writes the text content to a dataset
+ * Jenkins method that writes a text to a dataset
  *
  * @param listener      The listener for logging messages
  * @param zosConnection The ZOSConnection for interacting with z/OS
- * @param dsn           The name of the dataset
+ * @param dsn           The name of a dataset in the form `DATASET.NAME` or `DATASET.NAME(MEMBER)`
  * @param text          The text content to be written
  * @throws AbortException if the text is not valid for the dataset or an error occurs during the write operation
  */
-fun writeToDataset(listener: TaskListener,
-                   zosConnection: ZOSConnection,
-                   dsn: String,
-                   text: String,
+fun writeTextToDatasetJenkins(listener: TaskListener,
+                              zosConnection: ZOSConnection,
+                              dsn: String,
+                              text: String,
                    ) {
-    validateTextForDataset(listener, zosConnection, dsn, text)
-    val textByteArray = text.replace("\r","").toByteArray()
-    runMFTryCatchWrappedQuery(listener) {
-        ZosDsn(zosConnection).writeDsn(dsn, textByteArray)
-    }
-    listener.logger.println(Messages.zdevops_declarative_writing_DS_success(dsn))
+  val (dataset, member) = parseDatasetName(dsn)
+  validateExceedingLines(zosConnection, dataset, text.split('\n'))
+  if (member.isNullOrBlank()) {
+    writeToPS(text, dataset, zosConnection)
+  } else {
+    writeToPDS(text, dataset, member, zosConnection)
+  }
+  listener.logger.println(Messages.zdevops_declarative_writing_DS_success(dsn))
 }
 
-
-/**
- * Writes the text content to a member
- *
- * @param listener      The listener for logging messages
- * @param zosConnection The ZOSConnection for interacting with z/OS
- * @param dsn           The name of the dataset
- * @param member        The name of the member
- * @param text          The text content to be written
- * @throws AbortException if the text is not valid for the dataset or an error occurs during the write operation
- */
-fun writeToMember(listener: TaskListener,
-                  zosConnection: ZOSConnection,
-                  dsn: String,
-                  member: String,
-                  text: String,) {
-    validateTextForDataset(listener, zosConnection, dsn, text)
-    val textByteArray = text.replace("\r","").toByteArray()
-    runMFTryCatchWrappedQuery(listener) {
-        ZosDsn(zosConnection).writeDsn(dsn, member, textByteArray)
-    }
-    listener.logger.println(Messages.zdevops_declarative_writing_DS_success(dsn))
-}
 
 //TODO: docs
 fun writeToFile(listener: TaskListener,
@@ -131,12 +90,13 @@ fun writeToFile(listener: TaskListener,
 /**
  * Finds the line numbers in a file where the line length exceeds a specified record length (LRECL).
  *
- * @param file the file to be read and analyzed.
+// * @param file the file to be read and analyzed.
+ * @param text the text to validate for lines exceeding the target dataset's record length
  * @param lrecl the maximum allowed record length for each line.
  * @return a list of line numbers where the line length exceeds the specified LRECL.
  */
-fun findLinesExceedingRecordLength(file: File, lrecl: Int): List<Int> {
-  return file.readLines().mapIndexedNotNull { index, line ->
+fun findLinesExceedingRecordLength(text: List<String>, lrecl: Int): List<Int> {
+  return text.mapIndexedNotNull { index, line ->
     if(line.length > lrecl) index + 1 else null
   }
 }
@@ -153,7 +113,7 @@ fun findLinesExceedingRecordLength(file: File, lrecl: Int): List<Int> {
  * @throws AbortException if the dataset information cannot be retrieved.
  * @throws IllegalArgumentException if the provided directory path does not exist or is invalid.
  */
-fun writeDirectoryToDataset(
+fun writeDirectoryToPdsJenkins(
   dsn: String,
   dir: String,
   isLocalPath: Boolean,
@@ -162,9 +122,6 @@ fun writeDirectoryToDataset(
   zosConnection: ZOSConnection,
 ) {
   listener.logger.println(zMessages.zdevops_declarative_writing_DS_from_dir(dsn, dir, zosConnection.host, zosConnection.zosmfPort))
-
-  val targetDS = ZosDsn(zosConnection).getDatasetInfo(dsn)
-  val lrecl = targetDS.recordLength ?: throw AbortException(zMessages.zdevops_declarative_writing_DS_no_info(dsn))
 
   val localOrWsDirPath = resolveDirectoryPath(dir, isLocalPath, listener, workspace)
   validatePathExists(localOrWsDirPath)
@@ -176,7 +133,7 @@ fun writeDirectoryToDataset(
   }
 
   listener.logger.println("Found ${directoryEntries.size} entries in the directory:")
-  directoryEntries.forEachIndexed { index, entry ->  processEntry(index, entry, dsn, listener, lrecl, zosConnection) }
+  directoryEntries.forEachIndexed { index, entry ->  processEntry(index, entry, dsn, listener, zosConnection) }
 
   listener.logger.println(zMessages.zdevops_declarative_writing_DS_success(dsn))
 }
@@ -233,7 +190,6 @@ fun validatePathLeadsToDirectory(dir: File) {
  * @param entry the file or directory being processed.
  * @param dsn the dataset name (DSN) where the file will be written.
  * @param listener the task listener used for logging progress and feedback.
- * @param lrecl the record length of the target dataset.
  * @param zosConnection the connection information for interacting with z/OS system.
  *
  * Logs details about the entry and writes the file to the dataset if the entry is a regular file.
@@ -244,7 +200,6 @@ private fun processEntry(
   entry: File,
   dsn: String,
   listener: TaskListener,
-  lrecl: Int,
   zosConnection: ZOSConnection
 ) {
   if (entry.isDirectory) {
@@ -252,7 +207,7 @@ private fun processEntry(
     return
   }
   listener.logger.println("[$index] - Processing entry: '${entry.name}'")
-  writeFileToDataset(entry, dsn, lrecl, zosConnection)
+  writeFileToPDS(entry, dsn, zosConnection)
 }
 
 /**
@@ -260,33 +215,48 @@ private fun processEntry(
  *
  * @param file the file whose contents will be written to the dataset.
  * @param dsn the dataset name (DSN) where the file content will be written.
- * @param lrecl the record length of the target dataset.
  * @param zosConnection the connection information for interacting with the z/OS system.
  *
  * @throws AbortException if the file contains lines exceeding the dataset's record length.
  *
- * This function validates that all lines in the file conform to the specified record length (LRECL).
- * If any line exceeds this length, an error is logged, and the operation is aborted.
- * Upon successful validation, the file content is written to a member in the specified dataset,
+ * The file content is written to a member in the specified dataset,
  * using the file's name (without extension) as the member name.
  */
-fun writeFileToDataset(
+fun writeFileToPDS(
   file: File,
   dsn: String,
-  lrecl: Int,
   zosConnection: ZOSConnection,
 ) {
-  val exceedingLines = findLinesExceedingRecordLength(file, lrecl)
-  if (exceedingLines.isNotEmpty()) {
-    throw AbortException(
-      "Error: File '${file.name}' contains lines exceeding record length '$lrecl' of dataset '$dsn'. " +
-              "Exceeding line numbers: $exceedingLines"
-    )
-  }
+  validateExceedingLines(zosConnection, dsn, file.readLines())
   writeToPDS(file.readText(), dsn, file.nameWithoutExtension, zosConnection)
 }
 
-// TODO How to handle exceptions
+/**
+ * This function validates that text conform to the specified record length (LRECL).
+ * If any line exceeds this length, an error is logged, and the operation is aborted.
+ *
+ * @param dsn the dataset name (DSN) where the file content will be written.
+ * @param text the text to validate for lines exceeding the target dataset's record length
+ * @param zosConnection the connection information for interacting with the z/OS system.
+ * @throws AbortException if the file contains lines exceeding the dataset's record length.
+ */
+fun validateExceedingLines(
+  zosConnection: ZOSConnection,
+  dsn: String,
+  text: List<String>
+) {
+  val targetDS = ZosDsn(zosConnection).getDatasetInfo(dsn)
+  val lrecl = targetDS.recordLength ?: throw AbortException(zMessages.zdevops_declarative_writing_DS_no_info(dsn))
+
+  val exceedingLines = findLinesExceedingRecordLength(text, lrecl)
+  if (exceedingLines.isNotEmpty()) {
+    throw AbortException(
+      "Error: Text contains lines exceeding record length '$lrecl' of dataset '$dsn'. " +
+              "Exceeding line numbers: $exceedingLines"
+    )
+  }
+}
+
 /**
  * Writes the provided text to a specific member of a Partitioned Data Set (PDS) on z/OS.
  *
@@ -297,6 +267,17 @@ fun writeFileToDataset(
  */
 fun writeToPDS(text: String, dsn: String, member: String, zosConnection: ZOSConnection) {
   ZosDsn(zosConnection).writeDsn(dsn, member, prepareTextForWritingToDS(text))
+}
+
+/**
+ * Writes the provided text to a Sequential Data Set (PS) on z/OS.
+ *
+ * @param text the content to write to the dataset.
+ * @param dsn the dataset name (DSN).
+ * @param zosConnection the connection information for interacting with the z/OS system.
+ */
+fun writeToPS(text: String, dsn: String, zosConnection: ZOSConnection) {
+  ZosDsn(zosConnection).writeDsn(dsn, prepareTextForWritingToDS(text))
 }
 
 /**

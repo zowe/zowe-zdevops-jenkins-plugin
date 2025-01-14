@@ -1,11 +1,15 @@
 /*
+ * Copyright (c) 2023-2025 IBA Group.
+ *
  * This program and the accompanying materials are made available under the terms of the
  * Eclipse Public License v2.0 which accompanies this distribution, and is available at
  * https://www.eclipse.org/legal/epl-v20.html
  *
  * SPDX-License-Identifier: EPL-2.0
  *
- * Copyright IBA Group 2023
+ * Contributors:
+ *   IBA Group
+ *   Zowe Community
  */
 
 package org.zowe.zdevops.classic.files.dsn
@@ -74,6 +78,8 @@ class WriteFileToMemberStepSpec : ShouldSpec({
                             isWritingToDataset = true
                         } else if (firstArg<String>().contains("Data has been written to dataset")) {
                             isWritten = true
+                        } else if (firstArg<String>().contains("[WARNING] - The method is deprecated")) {
+                            // ignore deprecation warning in tests
                         } else {
                             fail("Unexpected logger message: ${firstArg<String>()}")
                         }

@@ -3,6 +3,9 @@
 <?jelly escape-by-default='true'?>
 
 <jelly:jelly xmlns:jelly="jelly:core" xmlns:form="/lib/form">
+
+    <p><b>The method is deprecated. Please, consider switching to `Write to Dataset` step.</b></p>
+
 	<form:entry field="connectionName" title="${%zdevops.classic.connection.title}">
 		<form:select/>
 	</form:entry>

@@ -35,7 +35,7 @@ import org.zowe.zdevops.MockServerFactory
 import org.zowe.zdevops.declarative.*
 import org.zowe.zdevops.logic.validatePathExists
 import org.zowe.zdevops.logic.validatePathLeadsToDirectory
-import org.zowe.zdevops.logic.writeFileToDataset
+import org.zowe.zdevops.logic.writeFileToPDS
 import java.io.File
 import java.io.PrintStream
 import java.nio.file.Paths
@@ -99,15 +99,23 @@ class WriteDirToDatasetDeclarativeSpec : ShouldSpec({
     }
 
     should("should throw exception if file contains lines exceeding LRECL") {
+      responseDispatcher.injectEndpoint(
+        "${this.testCase.name.testName}_listDataSets",
+        { it?.requestLine?.contains("zosmf/restfiles/ds") ?: false },
+        { MockResponse().setBody(responseDispatcher.readMockJson("listDataSets") ?: "") }
+      )
+      val theDataset = "TEST.IJMP.DATASET3"
+
       val tempFile = File.createTempFile("temp", null).apply {
-        writeText("This is a very long line exceeding the LRECL limit.")
+        writeText("This is a very long line exceeding the LRECL limit. Even bigger than record length of the " +
+                "$theDataset dataset")
       }
 
       try {
         val exception = shouldThrow<AbortException> {
-          writeFileToDataset(tempFile, "TEST.DATASET", 10, zosConnection)
+          writeFileToPDS(tempFile, theDataset, zosConnection)
         }
-        exception.message shouldBe "Error: File '${tempFile.name}' contains lines exceeding record length '10' of dataset 'TEST.DATASET'. Exceeding line numbers: [1]"
+        exception.message shouldBe "Error: Text contains lines exceeding record length '80' of dataset '$theDataset'. Exceeding line numbers: [1]"
       } finally {
         tempFile.delete()
       }

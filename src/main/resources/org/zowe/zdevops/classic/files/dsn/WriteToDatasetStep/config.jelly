@@ -6,7 +6,7 @@
 	<form:entry field="connectionName" title="${%zdevops.classic.connection.title}">
 		<form:select/>
 	</form:entry>
-    <form:entry field="dsn" title="${%zdevops.classic.datasetName.title}">
+    <form:entry field="dsn" title="${%zdevops.classic.datasetName.title}" description="The name of a dataset in the form `DATASET.NAME` or `DATASET.NAME(MEMBER)`">
         <form:textbox/>
     </form:entry>
     <form:entry field="text" title="${%zdevops.classic.text.title}">
