@@ -47,11 +47,14 @@ stage ("stage-name") {
         downloadDS dsn:"EXAMPLE.DATASET(MEMBER)", vol:"VOL001"
         allocateDS dsn:"EXAMPLE.DATASET", alcUnit:"TRK", dsOrg:"PS", primary:1, secondary:1, recFm:"FB", failOnExist:"False"
         writeFileToDS dsn:"EXAMPLE.DATASET", file:"workspaceFile"
+        writeFileToDS dsn:"EXAMPLE.DATASET(MEMBER)", file:"workspaceFile"
         writeFileToDS dsn:"EXAMPLE.DATASET", file:"D:\\files\\localFile"
+        writeFileToDS dsn:"EXAMPLE.DATASET(MEMBER)", file:"D:\\files\\localFile"
         writeToDS dsn:"EXAMPLE.DATASET", text:"Write this string to dataset"
-        writeFileToMember dsn:"EXAMPLE.DATASET", member:"MEMBER", file:"workspaceFile"
-        writeFileToMember dsn:"EXAMPLE.DATASET", member:"MEMBER", file:"D:\\files\\localFile"
-        writeToMember dsn:"EXAMPLE.DATASET", member:"MEMBER", text:"Write this string to member"
+        writeToDS dsn:"EXAMPLE.DATASET(MEMBER)", text:"Write this string to dataset member"
+
+        writeDirToDS dir: "app/src/main/cbl/", dsn: "EXAMPLE.DATASET"
+        writeDirToDS dir: "D:\\resources\\cbl", dsn: "EXAMPLE.DATASET", isLocalPath: true
 
         writeToFile destFile: "u/USER/myfile", text: "Write this string to file"
         writeFileToFile destFile: "u/USER/myfile", sourceFile: "myfile.txt"
@@ -195,6 +198,25 @@ def active_units = performMvsCommand "D A,L"
     [Perform MVS command] - The command has been successfully executed
     ```
 
+### `writeDirToDS` - Write a Directory to a Dataset
+
+```groovy
+zosmf ("z/os-connection-name") {
+    writeDirToDS dir: "app/src/main/cbl", dsn: "EXAMPLE.DATASET"
+    writeDirToDS dir: "D:\\resources\\cbl", dsn: "EXAMPLE.DATASET", isLocalPath: true
+}
+```
+
+Mandatory parameters:
+* `dir: "app/src/main/cbl/"` - Path to the directory containing the files to be written.
+* `dsn: "EXAMPLE.DATASET"` - Name of the dataset (DSN) where the directory contents will be written.
+
+Optional Parameters:
+* `isLocalPath: true` - Indicates whether the directory path is local (`true`) or relative to the Jenkins pipeline workspace (`false`)
+
+Important Notes:
+* If a member already exists in the dataset, its content will be overwritten.
+* The `dir` parameter does not support file masks.
 
 
 ## Use case example

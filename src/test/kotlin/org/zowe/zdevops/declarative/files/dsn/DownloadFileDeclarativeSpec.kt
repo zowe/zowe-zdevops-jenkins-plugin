@@ -8,7 +8,7 @@
  * Copyright IBA Group 2022
  */
 
-package org.zowe.zdevops.declarative.jobs
+package org.zowe.zdevops.declarative.files.dsn
 
 import hudson.EnvVars
 import hudson.FilePath
@@ -30,8 +30,9 @@ import org.zowe.zdevops.MockServerFactory
 import org.zowe.zdevops.declarative.*
 import java.io.File
 import java.io.PrintStream
+import java.nio.file.Paths
 
-class SubmitJobStepDeclarativeSpec : ShouldSpec({
+class DownloadFileDeclarativeSpec : ShouldSpec({
   lateinit var mockServer: MockWebServer
   lateinit var responseDispatcher: MockResponseDispatcher
   val mockServerFactory = MockServerFactory()
@@ -43,36 +44,37 @@ class SubmitJobStepDeclarativeSpec : ShouldSpec({
   afterSpec {
     mockServerFactory.stopMockServer()
   }
-  context("declarative/jobs module: SubmitJobStep") {
+  context("declarative/jobs module: DownloadFileDeclarative") {
     val virtualChannel = TestVirtualChannel()
     val zosConnection = ZOSConnection(mockServer.hostName, mockServer.port.toString(), "test", "test", "https")
+    val trashDir = tempdir()
+    val itemGroup = object : TestItemGroup() {
+      override fun getRootDirFor(child: Item?): File {
+        return trashDir
+      }
+    }
+    val job = TestJob(itemGroup, "test")
+    val run = TestRun(job)
+    val trashDirWithInternal = Paths.get(trashDir.absolutePath, "test_name").toString()
+    val workspace = FilePath(File(trashDirWithInternal))
+    val env = EnvVars()
 
     afterEach {
       responseDispatcher.removeAllEndpoints()
     }
-    should("perform SubmitJobStepDeclarative operation") {
-      var isJobSubmitting = false
-      var isJobSubmitted = false
-      val trashDir = tempdir()
-      val itemGroup = object : TestItemGroup() {
-        override fun getRootDirFor(child: Item?): File {
-          return trashDir
-        }
-      }
-      val job = TestJob(itemGroup, "test")
-      val run = TestRun(job)
-      val workspace = FilePath(File(""))
-      val env = EnvVars()
+    should("perform DownloadFileDeclarative operation to download sequential dataset") {
+      var isDownloadDatasetStarted = false
+      var isDownloaded = false
       val taskListener = object : TestBuildListener() {
         override fun getLogger(): PrintStream {
           val logger = mockk<PrintStream>()
           every {
             logger.println(any<String>())
           } answers {
-            if (firstArg<String>().contains("Submitting a JOB")) {
-              isJobSubmitting = true
-            } else if (firstArg<String>().contains("JOB submitted successfully")) {
-              isJobSubmitted = true
+            if (firstArg<String>().contains("Downloading dataset")) {
+              isDownloadDatasetStarted = true
+            } else if (firstArg<String>().contains("has been downloaded successfully")) {
+              isDownloaded = true
             } else {
               fail("Unexpected logger message: ${firstArg<String>()}")
             }
@@ -83,15 +85,23 @@ class SubmitJobStepDeclarativeSpec : ShouldSpec({
       val launcher = TestLauncher(taskListener, virtualChannel)
 
       responseDispatcher.injectEndpoint(
-        this.testCase.name.testName,
-        { it?.requestLine?.contains("zosmf/restjobs/jobs") ?: false },
-        { MockResponse().setBody(responseDispatcher.readMockJson("submitJobResponse") ?: "") }
+        "${this.testCase.name.testName}_listDataSets",
+        { it?.requestLine?.contains("zosmf/restfiles/ds?dslevel") ?: false },
+        { MockResponse().setBody(responseDispatcher.readMockJson("listDataSetsPS") ?: "") }
+      )
+      val retrieveDatasetContentResp = javaClass.classLoader.getResource("mock/retrieveDatasetContentResponse.txt")?.readText()
+      responseDispatcher.injectEndpoint(
+        "${this.testCase.name.testName}_retrieveDatasetContent",
+        { it?.requestLine?.contains("/zosmf/restfiles/ds/") ?: false },
+        { MockResponse().setBody(retrieveDatasetContentResp ?: "") }
       )
 
-      val submitJobStepDeclInst = spyk(
-        SubmitJobStepDeclarative("test")
+      val downloadFileDecl = spyk(
+        DownloadFileDeclarative("TEST")
       )
-      submitJobStepDeclInst.perform(
+      downloadFileDecl.setVol("TEST")
+      downloadFileDecl.setReturnEtag(false)
+      downloadFileDecl.perform(
         run,
         workspace,
         env,
@@ -100,8 +110,8 @@ class SubmitJobStepDeclarativeSpec : ShouldSpec({
         zosConnection
       )
 
-      assertSoftly { isJobSubmitting shouldBe true }
-      assertSoftly { isJobSubmitted shouldBe true }
+      assertSoftly { isDownloadDatasetStarted shouldBe true }
+      assertSoftly { isDownloaded shouldBe true }
     }
   }
 })

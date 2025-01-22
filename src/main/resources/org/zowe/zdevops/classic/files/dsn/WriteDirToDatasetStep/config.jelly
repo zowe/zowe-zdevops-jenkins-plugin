@@ -1,0 +1,21 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<?jelly escape-by-default='true'?>
+
+<jelly:jelly xmlns:jelly="jelly:core" xmlns:form="/lib/form">
+
+    <form:entry field="connectionName" title="${%zdevops.classic.connection.title}">
+        <form:select/>
+    </form:entry>
+    <form:entry field="dir" title="${%zdevops.classic.dir.title}">
+        <form:textbox/>
+    </form:entry>
+    <form:entry  title="${%zdevops.classic.isLocalPath.title}" description="${%zdevops.classic.isLocalPath.description}">
+        <form:checkbox field="isLocalPath"/>
+    </form:entry>
+    <form:entry field="dsn" title="${%zdevops.classic.datasetName.title}">
+        <form:textbox/>
+    </form:entry>
+
+
+</jelly:jelly>
