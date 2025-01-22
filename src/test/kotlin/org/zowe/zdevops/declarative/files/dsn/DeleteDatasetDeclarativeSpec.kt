@@ -175,8 +175,7 @@ class DeleteDatasetDeclarativeSpec : ShouldSpec({
       val deleteDatasetDecl = spyk(
         DeleteDatasetDeclarative()
       )
-      deleteDatasetDecl.setDsn("test")
-      deleteDatasetDecl.setMember("test")
+      deleteDatasetDecl.setDsn("test(test)")
       deleteDatasetDecl.perform(
         run,
         workspace,
@@ -211,8 +210,7 @@ class DeleteDatasetDeclarativeSpec : ShouldSpec({
       val deleteDatasetDecl = spyk(
         DeleteDatasetDeclarative()
       )
-      deleteDatasetDecl.setDsn("test")
-      deleteDatasetDecl.setMember("testlongmembername")
+      deleteDatasetDecl.setDsn("test(testlongmembername)")
       runCatching {
         deleteDatasetDecl.perform(
           run,

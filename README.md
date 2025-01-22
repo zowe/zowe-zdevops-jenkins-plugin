@@ -61,7 +61,7 @@ stage ("stage-name") {
         writeFileToFile destFile: "u/USER/myfile", sourceFile: "myfile.txt", binary: "true"
 
         deleteDataset dsn:"EXAMPLE.DATASET", failOnNotExist:"False"
-        deleteDataset dsn:"EXAMPLE.DATASET", member:"MEMBER", failOnNotExist:"True"
+        deleteDataset dsn:"EXAMPLE.DATASET(MEMBER)", failOnNotExist:"True"
         deleteDatasetsByMask mask:"EXAMPLE.DATASET.*", failOnNotExist:"False"
     }
     // ...
@@ -124,19 +124,19 @@ zosmf ("z/os-connection-name") {
 ### deleteDataset - Represents an action for deleting datasets and members in a declarative style
 ```groovy
 zosmf ("z/os-connection-name") {
-    deleteDataset dsn: "EXAMPLE.DATASET", member:"MEMBER", failOnNotExist:"False"
+    deleteDataset dsn: "EXAMPLE.DATASET(MEMBER)", failOnNotExist: false
 }
 ```
 **Mandatory Parameters:**
-   * ```dsn:"EXAMPLE.DATASET"``` - Sequential or library dataset name for deletion
-   * ```member:"MEMBER"``` - Dataset member name for deletion
-   * ```failOnNotExist:"False"``` - If the dataset has been deleted and the option is enabled, execution will halt. (Boolean parameter, is set to 'False' by default)
+   * ```dsn:"EXAMPLE.DATASET"``` - Sequential or library dataset name in the form `HLQ.DSNAME` or `HLQ.DSNAME(MEMNAME)`
+**Optional Parameters:**
+   * `failOnNotExist: false` - Fail the execution if the entity does not exist. Boolean parameter, is set to 'false' by default.
 
 **Expected behavior under various deletion scenarios:**
 
-* To delete a member from the library, the dsn and member parameters must be specified:
+* To delete a member from the library, provide dataset member name in the form `HLQ.DSNAME(MEMNAME)`:
     ```
-    deleteDataset dsn:"EXAMPLE.DATASET", member:"MEMBER", failOnNotExist:"False"
+    deleteDataset dsn:"EXAMPLE.DATASET(MEMBER1)", failOnNotExist: false
     ```
 
 * You cannot delete a VSAM dataset this way. Otherwise, you will get output similar to:

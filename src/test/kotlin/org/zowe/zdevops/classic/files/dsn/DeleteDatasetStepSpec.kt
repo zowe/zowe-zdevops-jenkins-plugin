@@ -91,7 +91,7 @@ class DeleteDatasetStepSpec : ShouldSpec({
             )
 
             val deleteDatasetStep = spyk(
-                DeleteDatasetStep("test", "TEST.IJMP.DATASET1", member = null)
+                DeleteDatasetStep("test", "TEST.IJMP.DATASET1")
             )
             deleteDatasetStep.perform(
                 build,
@@ -134,7 +134,7 @@ class DeleteDatasetStepSpec : ShouldSpec({
             )
 
             val deleteDatasetStep = spyk(
-                DeleteDatasetStep("test", "TEST.IJMP.DATASET1", member = null, failOnNotExist = false)
+                DeleteDatasetStep("test", "TEST.IJMP.DATASET1", failOnNotExist = false)
             )
             deleteDatasetStep.perform(
                 build,
@@ -155,12 +155,6 @@ class DeleteDatasetStepSpec : ShouldSpec({
         should("validate dataset name") {
             descriptor.doCheckDsn("") shouldBe FormValidation.error(Messages.zdevops_value_must_not_be_empty_validation())
             descriptor.doCheckDsn("MY_DATASET") shouldBe FormValidation.error(Messages.zdevops_dataset_name_is_invalid_validation())
-        }
-
-        should("validate member name") {
-            descriptor.doCheckMember("") shouldBe FormValidation.ok()
-            descriptor.doCheckMember("@MY_DS") shouldBe FormValidation.warning(Messages.zdevops_member_name_is_invalid_validation())
-            descriptor.doCheckMember("DSNAME") shouldBe FormValidation.ok()
         }
     }
 })

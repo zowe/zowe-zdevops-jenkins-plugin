@@ -6,13 +6,10 @@
 	<form:entry field="connectionName" title="${%zdevops.classic.connection.title}">
 		<form:select/>
 	</form:entry>
-    <form:entry field="dsn" title="${%zdevops.classic.dsn.title}">
+    <form:entry field="dsn" title="${%zdevops.classic.dsn.title}" description="${%zdevops.classic.dsn.desc}">
         <form:textbox/>
     </form:entry>
-    <form:entry field="member" title="${%zdevops.classic.member.title}">
-        <form:textbox/>
-    </form:entry>
-    <form:entry field="failOnNotExist" title="failOnNotExist?" description="If the dataset does not exists and the option is enabled, execution will halt.">
+    <form:entry field="failOnNotExist" title="${%zdevops.classic.failOnNotExist.title}">
         <form:checkbox/>
     </form:entry>
 </jelly:jelly>
