@@ -47,21 +47,18 @@ stage ("stage-name") {
         downloadDS dsn:"EXAMPLE.DATASET(MEMBER)", vol:"VOL001"
         allocateDS dsn:"EXAMPLE.DATASET", alcUnit:"TRK", dsOrg:"PS", primary:1, secondary:1, recFm:"FB", failOnExist:"False"
         writeFileToDS dsn:"EXAMPLE.DATASET", file:"workspaceFile"
-        writeFileToDS dsn:"EXAMPLE.DATASET(MEMBER)", file:"workspaceFile"
         writeFileToDS dsn:"EXAMPLE.DATASET", file:"D:\\files\\localFile"
-        writeFileToDS dsn:"EXAMPLE.DATASET(MEMBER)", file:"D:\\files\\localFile"
         writeToDS dsn:"EXAMPLE.DATASET", text:"Write this string to dataset"
-        writeToDS dsn:"EXAMPLE.DATASET(MEMBER)", text:"Write this string to dataset member"
-
-        writeDirToDS dir: "app/src/main/cbl/", dsn: "EXAMPLE.DATASET"
-        writeDirToDS dir: "D:\\resources\\cbl", dsn: "EXAMPLE.DATASET", isLocalPath: true
+        writeFileToMember dsn:"EXAMPLE.DATASET", member:"MEMBER", file:"workspaceFile"
+        writeFileToMember dsn:"EXAMPLE.DATASET", member:"MEMBER", file:"D:\\files\\localFile"
+        writeToMember dsn:"EXAMPLE.DATASET", member:"MEMBER", text:"Write this string to member"
 
         writeToFile destFile: "u/USER/myfile", text: "Write this string to file"
         writeFileToFile destFile: "u/USER/myfile", sourceFile: "myfile.txt"
         writeFileToFile destFile: "u/USER/myfile", sourceFile: "myfile.txt", binary: "true"
 
         deleteDataset dsn:"EXAMPLE.DATASET", failOnNotExist:"False"
-        deleteDataset dsn:"EXAMPLE.DATASET(MEMBER)", failOnNotExist:"True"
+        deleteDataset dsn:"EXAMPLE.DATASET", member:"MEMBER", failOnNotExist:"True"
         deleteDatasetsByMask mask:"EXAMPLE.DATASET.*", failOnNotExist:"False"
     }
     // ...
@@ -71,7 +68,7 @@ stage ("stage-name") {
 
 ## Declarative Methods Detail Description
 
-### allocateDS - Represents an action for allocating a dataset in a declarative style
+### allocateDS - Represents an action for allocating a dataset
 ```groovy
 zosmf ("z/os-connection-name") {
     allocateDS(
@@ -120,23 +117,75 @@ zosmf ("z/os-connection-name") {
    * ```dsnType:"LIBRARY"``` - Specifies the type of dataset, LIBRARY for a PDS or PDSE.
    * ```dsModel:"MODEL.DATASET.NAME"``` - Data set model is a predefined set of attributes that can be used to allocate new data sets with the same characteristics ("LIKE" parameter).
 
+#### Examples
+**To allocate a Sequential Dataset**:
+```groovy
+zosmf ("z/os-connection-name") {
+  allocateDS(
+    // Mandatory Parameters below:
+    dsn: "EXAMPLE.SEQ.DATASET",
+    dsOrg: "PS",
+    primary: 1,
+    secondary: 1,
+    recFm: "FB",
+    failOnExist: false,
+    // Optional Parameters below:
+//    volser:"YOURVOLSER",
+    unit:"SYSDA",
+    alcUnit:"TRK",
+    blkSize:"800",
+    lrecl:"80",
+    // storClass:"STORAGECLASS",
+    // mgntClass:"MGMTCLASS",
+    // dataClass:"DATACLASS",
+    avgBlk:"10",
+  )
+}
+```
+
+**To allocate a PDS dataset**:
+```groovy
+zosmf ("z/os-connection-name") {
+  allocateDS(
+      // Mandatory Parameters below:
+      dsn: "EXAMPLE.PDS.DATASET",
+      dsOrg: "PO",
+      primary: 1,
+      secondary: 1,
+      recFm: "FB",
+      failOnExist: false,
+      // Optional Parameters below:
+      // volser:"YOURVOL",
+      unit:"SYSDA",
+      alcUnit:"TRK",
+      dirBlk:"10",
+      blkSize:"800",
+      lrecl:"80",
+      // storClass:"STORAGECLASS",
+      // mgntClass:"MGMTCLASS",
+      // dataClass:"DATACLASS",
+      avgBlk:"10",
+      dsnType:"LIBRARY",
+  )
+}
+```
 
 ### deleteDataset - Represents an action for deleting datasets and members in a declarative style
 ```groovy
 zosmf ("z/os-connection-name") {
-    deleteDataset dsn: "EXAMPLE.DATASET(MEMBER)", failOnNotExist: false
+    deleteDataset dsn: "EXAMPLE.DATASET", member:"MEMBER", failOnNotExist:"False"
 }
 ```
 **Mandatory Parameters:**
-   * ```dsn:"EXAMPLE.DATASET"``` - Sequential or library dataset name in the form `HLQ.DSNAME` or `HLQ.DSNAME(MEMNAME)`
-**Optional Parameters:**
-   * `failOnNotExist: false` - Fail the execution if the entity does not exist. Boolean parameter, is set to 'false' by default.
+   * ```dsn:"EXAMPLE.DATASET"``` - Sequential or library dataset name for deletion
+   * ```member:"MEMBER"``` - Dataset member name for deletion
+   * ```failOnNotExist:"False"``` - If the dataset has been deleted and the option is enabled, execution will halt. (Boolean parameter, is set to 'False' by default)
 
 **Expected behavior under various deletion scenarios:**
 
-* To delete a member from the library, provide dataset member name in the form `HLQ.DSNAME(MEMNAME)`:
+* To delete a member from the library, the dsn and member parameters must be specified:
     ```
-    deleteDataset dsn:"EXAMPLE.DATASET(MEMBER1)", failOnNotExist: false
+    deleteDataset dsn:"EXAMPLE.DATASET", member:"MEMBER", failOnNotExist:"False"
     ```
 
 * You cannot delete a VSAM dataset this way. Otherwise, you will get output similar to:
@@ -198,25 +247,6 @@ def active_units = performMvsCommand "D A,L"
     [Perform MVS command] - The command has been successfully executed
     ```
 
-### `writeDirToDS` - Write a Directory to a Dataset
-
-```groovy
-zosmf ("z/os-connection-name") {
-    writeDirToDS dir: "app/src/main/cbl", dsn: "EXAMPLE.DATASET"
-    writeDirToDS dir: "D:\\resources\\cbl", dsn: "EXAMPLE.DATASET", isLocalPath: true
-}
-```
-
-Mandatory parameters:
-* `dir: "app/src/main/cbl/"` - Path to the directory containing the files to be written.
-* `dsn: "EXAMPLE.DATASET"` - Name of the dataset (DSN) where the directory contents will be written.
-
-Optional Parameters:
-* `isLocalPath: true` - Indicates whether the directory path is local (`true`) or relative to the Jenkins pipeline workspace (`false`)
-
-Important Notes:
-* If a member already exists in the dataset, its content will be overwritten.
-* The `dir` parameter does not support file masks.
 
 
 ## Use case example
